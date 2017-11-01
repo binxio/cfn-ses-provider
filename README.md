@@ -40,3 +40,8 @@ aws cloudformation create-stack --stack-name cfn-ses-provider-demo \
 
 aws cloudformation wait stack-create-complete  --stack-name cfn-ses-provider-demo
 ```
+view the installed identity:
+
+```
+aws --region eu-west-1 ses list-identities
+```
