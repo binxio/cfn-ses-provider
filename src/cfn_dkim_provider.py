@@ -36,22 +36,27 @@ class DKIMProvider(ResourceProvider):
         if hosted_zone_id == 'could-not-create':
             return
 
-        paginator = self.route53.get_paginator('list_resource_record_sets')
+        hosted_zone_name = self.get_hosted_zone_name(hosted_zone_id)
+        self.delete_identity(hosted_zone_name)
+        self.delete_dns_records(hosted_zone_name)
 
-        hosted_zone = self.get_hosted_zone_name(hosted_zone_id)
+    def delete_identity(self, hosted_zone_name):
+        ses = boto3.client('ses', region_name=self.get('Region'))
+        ses.delete_identity(Identity=hosted_zone_name.rstrip('.'))
 
+    def delete_dns_records(self, hosted_zone_name):
         to_delete = []
-        suffix = '_domainkey.%s' % hosted_zone
-        page_iterator = paginator.paginate(HostedZoneId=hosted_zone_id, StartRecordName=suffix)
-        for page in page_iterator:
-            records = filter(lambda rr: rr['Type'] == 'CNAME' and rr['Name'].endswith('.%s' % suffix), page['ResourceRecordSets'])
-            to_delete.extend(records)
+        hosted_zone_id = self.physical_resource_id
 
-        amazonses = '_amazonses.%s' % hosted_zone
-        page_iterator = paginator.paginate(HostedZoneId=hosted_zone_id, StartRecordName=amazonses)
-        for page in page_iterator:
-            records = filter(lambda rr: rr['Type'] == 'TXT' and rr['Name'] == amazonses, page['ResourceRecordSets'])
-            to_delete.extend(records)
+        paginator = self.route53.get_paginator('list_resource_record_sets')
+        for page in paginator.paginate(HostedZoneId=hosted_zone_id):
+            for rr in page['ResourceRecordSets']:
+                if rr['Type'] == 'CNAME' and rr['Name'].endswith('._domainkey.%s' % hosted_zone_name):
+                    to_delete.append(rr)
+                elif rr['Type'] == 'TXT' and rr['Name'] == '_amazonses.%s' % hosted_zone_name:
+                    to_delete.append(rr)
+                else:
+                    pass
 
         if len(to_delete) > 0:
             batch = {'Changes': [{'Action': 'DELETE', 'ResourceRecordSet': rr} for rr in to_delete]}
@@ -80,7 +85,7 @@ class DKIMProvider(ResourceProvider):
                         'TTL': 60,
                         'ResourceRecords': [
                             {
-                                'Value': '%s' % verification_token
+                                'Value': '"%s"' % verification_token
                             }
                         ]
                     }

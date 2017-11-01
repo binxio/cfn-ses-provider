@@ -69,6 +69,7 @@ clean:
 	rm -rf venv target src/*.pyc tests/*.pyc
 
 test: venv
+	python -m compileall src/*.py tests/*.py
 	jq . cloudformation/*.json > /dev/null
 	. ./venv/bin/activate && \
 	pip --quiet install -r test-requirements.txt && \

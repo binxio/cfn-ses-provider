@@ -7,6 +7,7 @@ import subprocess
 from ses import handler
 
 
+ses = boto3.client('ses', region_name='eu-west-1')
 route53 = boto3.client('route53')
 
 
@@ -27,20 +28,40 @@ def test_create():
         request = Request('Create', hosted_zone_id)
         response = handler(request, {})
         assert response['Status'] == 'SUCCESS', response['Reason']
+
+        identities = filter(lambda i: i == name, ses.list_identities(IdentityType='Domain')['Identities'])
+        assert len(identities) == 1, 'could not find domain %s as SES identity' % name
+
         physical_resource_id = response['PhysicalResourceId']
-        wait_for_change_completion(response['Data']['ChangeId'])
+        # wait_for_change_completion(response['Data']['ChangeId'])
+
+        records = route53.list_resource_record_sets(HostedZoneId=hosted_zone_id)['ResourceRecordSets']
+        ses_verification_record = filter(lambda r: r['Name'] == '_amazonses.%s.' % name, records)
+        dkim_verification_records = filter(lambda r: r['Name'].endswith('._domainkey.%s.' % name), records)
+        assert len(ses_verification_record) == 1, 'could not find _amazonses.%s. record' % name
+        assert len(dkim_verification_records) > 0, 'could not find any _domainkey.%s. records' % name
 
         request = Request('Update', hosted_zone_id, physical_resource_id)
         response = handler(request, {})
         assert response['Status'] == 'SUCCESS', response['Reason']
         assert physical_resource_id == response['PhysicalResourceId']
-        wait_for_change_completion(response['Data']['ChangeId'])
+        # wait_for_change_completion(response['Data']['ChangeId'])
 
         request = Request('Delete', hosted_zone_id, physical_resource_id)
         response = handler(request, {})
         assert response['Status'] == 'SUCCESS', response['Reason']
+
         assert physical_resource_id == response['PhysicalResourceId']
-        wait_for_change_completion(response['Data']['ChangeId'])
+        # wait_for_change_completion(response['Data']['ChangeId'])
+
+        identities = filter(lambda i: i == name, ses.list_identities(IdentityType='Domain')['Identities'])
+        assert len(identities) == 0, 'domain %s is still present as a SES identity' % name
+
+        records = route53.list_resource_record_sets(HostedZoneId=hosted_zone_id)['ResourceRecordSets']
+        ses_verification_record = filter(lambda r: r['Name'] == '_amazonses.%s.' % name, records)
+        dkim_verification_records = filter(lambda r: r['Name'].endswith('._domainkey.%s.' % name), records)
+        assert len(ses_verification_record) == 0, '_amazonses.%s. record still present' % name
+        assert len(dkim_verification_records) == 0, '_domainkey.%s. records still present' % name
 
     finally:
         if hosted_zone_id is not None:
