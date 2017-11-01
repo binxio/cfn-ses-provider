@@ -80,7 +80,7 @@ class DKIMProvider(ResourceProvider):
                         'TTL': 60,
                         'ResourceRecords': [
                             {
-                                'Value': '"%s"' % verification_token
+                                'Value': '%s' % verification_token
                             }
                         ]
                     }
