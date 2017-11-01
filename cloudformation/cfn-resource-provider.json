@@ -126,7 +126,7 @@
           "S3Key": {
             "Fn::If": [
               "UsePublicLambda",
-              "lambdas/cfn-ses-provider-0.1.0.zip",
+              "lambdas/cfn-ses-provider-0.1.1.zip",
               {
                 "Ref": "CFNSESProviderZipFileName"
               }

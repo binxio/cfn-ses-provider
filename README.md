@@ -28,7 +28,7 @@ aws cloudformation create-stack \
 aws cloudformation wait stack-create-complete  --stack-name cfn-ses-provider 
 ```
 
-This CloudFormation template will use our pre-packaged provider from `s3://binxio-public/lambdas/cfn-kong-provider-latest.zip`.
+This CloudFormation template will use our pre-packaged provider from `s3://binxio-public/lambdas/cfn-kong-provider-0.1.1.zip`.
 
 
 ## Demo
