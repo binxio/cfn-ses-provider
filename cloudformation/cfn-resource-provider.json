@@ -8,7 +8,7 @@
     },
     "CFNSESProviderZipFileName": {
       "Type": "String",
-      "Default": "lambdas/cfn-ses-provider-0.1.0.zip"
+      "Default": ""
     }
   },
   "Conditions": {
@@ -16,6 +16,14 @@
       "Fn::Equals": [
         {
           "Ref": "LambdaS3Bucket"
+        },
+        ""
+      ]
+    },
+    "UsePublicLambda": {
+      "Fn::Equals": [
+        {
+          "Ref": "CFNSESProviderZipFileName"
         },
         ""
       ]
@@ -118,7 +126,13 @@
             ]
           },
           "S3Key": {
-            "Ref": "CFNSESProviderZipFileName"
+            "Fn::If": [
+              "UsePublicLambda",
+              "lambdas/cfn-ses-provider-latest.1.0.zip",
+              {
+                "Ref": "CFNSESProviderZipFileName"
+              }
+            ]
           }
         },
         "FunctionName": "binxio-cfn-ses-provider",
