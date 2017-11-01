@@ -101,7 +101,8 @@
     "CFNSESProvider": {
       "Type": "AWS::Lambda::Function",
       "DependsOn": [
-        "LambdaRole"
+        "LambdaRole",
+        "LambdaPolicy"
       ],
       "Properties": {
         "Description": "CloudFormation SES provider implementation",
