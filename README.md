@@ -1,5 +1,5 @@
 # cfn-ses-provider
-A collection of CloudFormation custom providers for managing Simple Email Services
+A  CloudFormation custom provider for managing Simple Email Services DKIM records in route53
 
 ## How do I add DKIM records to my Route53 domain?
 It is quite easy: you specify a CloudFormation resource of type [Custom::DKIM](docs/DKIM.md):
