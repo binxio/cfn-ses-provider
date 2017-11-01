@@ -36,7 +36,7 @@
         "LambdaRole"
       ],
       "Properties": {
-        "PolicyName": "CFNSESKongProviderPolicy",
+        "PolicyName": "CFNSESProviderPolicy",
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -46,9 +46,7 @@
                 "route53:GetHostedZone",
                 "route53:ChangeResourceRecordSets"
               ],
-              "Resource": [
-                null
-              ]
+              "Resource": "*"
             },
             {
               "Effect": "Allow",
