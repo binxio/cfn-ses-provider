@@ -98,7 +98,7 @@ demo:
 	aws cloudformation $(COMMAND)-stack --stack-name $(NAME)-demo \
 		--capabilities CAPABILITY_IAM \
 		--template-body file://cloudformation/demo-stack.json \
-		--parameters ParameterKey=KongKeyName,ParameterValue=$(NAME)-demo 
+		--parameters ParameterKey=ExternalDomainName,ParameterValue=ses.cfn.internal
 	aws cloudformation wait stack-$(COMMAND)-complete  --stack-name $(NAME)-demo
 
 delete-demo:
