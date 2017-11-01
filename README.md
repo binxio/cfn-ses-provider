@@ -9,7 +9,7 @@ It is quite easy: you specify a CloudFormation resource of type [Custom::DKIM](d
     "Type": "Custom::DKIM",
     "Properties": {
       "HostedZoneId": { "Ref": "HostedZone" },
-      "Region": "eu-west-1"
+      "Region": "eu-west-1",
       "ServiceToken": { "Fn::Join": [ ":", [ "arn:aws:lambda", { "Ref": "AWS::Region" }, { "Ref": "AWS::AccountId" }, "function:binxio-cfn-kong-provider" ]]}
     }
   }
