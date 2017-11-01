@@ -53,6 +53,7 @@
               "Effect": "Allow",
               "Action": [
                 "ses:VerifyDomainDkim",
+	        "ses:DeleteIdentity",
                 "ses:VerifyDomainIdentity"
               ],
               "Resource": "*"
