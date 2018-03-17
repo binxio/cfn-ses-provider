@@ -70,7 +70,7 @@ clean:
 
 test: venv
 	python -m compileall src/*.py tests/*.py
-	jq . cloudformation/*.json > /dev/null
+	for template in cloudformation/*; do  aws cloudformation validate-template --template-body file://$$template ; done
 	. ./venv/bin/activate && \
 	pip --quiet install -r test-requirements.txt && \
 	cd src && \
