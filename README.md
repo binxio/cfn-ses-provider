@@ -4,15 +4,15 @@ A  CloudFormation custom provider for managing Simple Email Services DKIM record
 ## How do I add DKIM records to my Route53 domain?
 It is quite easy: you specify a CloudFormation resource of type [Custom::DKIM](docs/DKIM.md):
 
-```json
-  "DKIM": {
-    "Type": "Custom::DKIM",
-    "Properties": {
-      "HostedZoneId": { "Ref": "HostedZone" },
-      "Region": "eu-west-1",
-      "ServiceToken": { "Fn::Join": [ ":", [ "arn:aws:lambda", { "Ref": "AWS::Region" }, { "Ref": "AWS::AccountId" }, "function:binxio-cfn-kong-provider" ]]}
-    }
-  }
+```yaml
+Resources:
+  DKIM:
+    Type: Custom::DKIM
+    DependsOn: HostedZone
+    Properties:
+      HostedZoneId: !Ref 'HostedZone'
+      Region: !Ref 'EmailRegion'
+      ServiceToken: !Sub  'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider
 ```
 
 
@@ -28,7 +28,7 @@ aws cloudformation create-stack \
 aws cloudformation wait stack-create-complete  --stack-name cfn-ses-provider 
 ```
 
-This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-kong-provider-0.1.1.zip`.
+This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-ses-provider-0.2.1.zip`.
 
 
 ## Demo
