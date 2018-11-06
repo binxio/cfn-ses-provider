@@ -1,20 +1,30 @@
 # cfn-ses-provider
-A  CloudFormation custom provider for managing Simple Email Services DKIM records in route53
+A  CloudFormation custom provider for managing Simple Email Service and associated DKIM records in route53.
 
-## How do I add DKIM records to my Route53 domain?
-It is quite easy: you specify a CloudFormation resource of type [Custom::DKIM](docs/DKIM.md):
+## How do I add a domain to Simple Email Service?
+It is quite easy: you specify a CloudFormation resource of type [Custom::Domain](docs/Domain.md):
 
 ```yaml
 Resources:
   DKIM:
-    Type: Custom::DKIM
+    Type: Custom::Domain
     DependsOn: HostedZone
     Properties:
       HostedZoneId: !Ref 'HostedZone'
-      Region: !Ref 'EmailRegion'
-      ServiceToken: !Sub  'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider
+      DKIM: true
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider
 ```
 
+Or, when the domain is not hosted at Route53:
+```yaml
+Resources:
+  DKIM:
+    Type: Custom::Domain
+    Properties:
+      DomainName: example.com
+      DKIM: true
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider
+```
 
 ## Installation
 To install these custom resources, type:
@@ -23,12 +33,12 @@ To install these custom resources, type:
 aws cloudformation create-stack \
 	--capabilities CAPABILITY_IAM \
 	--stack-name cfn-ses-provider \
-	--template-body file://cloudformation/cfn-resource-provider.json 
+	--template-body file://cloudformation/cfn-resource-provider.json
 
-aws cloudformation wait stack-create-complete  --stack-name cfn-ses-provider 
+aws cloudformation wait stack-create-complete  --stack-name cfn-ses-provider
 ```
 
-This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-ses-provider-0.2.3.zip`.
+This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-ses-provider-0.2.4.zip`.
 
 
 ## Demo
@@ -42,6 +52,6 @@ aws cloudformation wait stack-create-complete  --stack-name cfn-ses-provider-dem
 ```
 view the installed identity:
 
-```
+```sh
 aws --region eu-west-1 ses list-identities
 ```

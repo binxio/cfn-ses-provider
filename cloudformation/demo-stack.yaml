@@ -4,20 +4,17 @@ Parameters:
   ExternalDomainName:
     Type: String
     Default: ses.cfn.internal
-  EmailRegion:
-    Type: String
-    Default: eu-west-1
 Resources:
   HostedZone:
     Type: AWS::Route53::HostedZone
     Properties:
       Name: !Ref 'ExternalDomainName'
   DKIM:
-    Type: Custom::DKIM
+    Type: Custom::Domain
     DependsOn: HostedZone
     Properties:
       HostedZoneId: !Ref 'HostedZone'
-      Region: !Ref 'EmailRegion'
+      DKIM: true
       ServiceToken: !Join
         - ':'
         - - arn:aws:lambda
