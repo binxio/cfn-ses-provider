@@ -76,5 +76,5 @@ Resources:
       Handler: ses.handler
       MemorySize: 128
       Role: !GetAtt 'LambdaRole.Arn'
-      Runtime: python2.7
+      Runtime: python3.6
       Timeout: 30
