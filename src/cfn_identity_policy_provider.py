@@ -117,7 +117,7 @@ class IdentityPolicyProvider(ResourceProvider):
     def get_identity_policy(self, Identity, PolicyName):
         try:
             current_policies = self.ses.get_identity_policies(Identity=Identity, PolicyNames=[PolicyName])['Policies']
-            return current_policies[PolicyName] if PolicyName in current_policies else None
+            return current_policies.get(PolicyName)
         except (BotoCoreError, ClientError) as e:
             self.fail('Failed to retrieve identity policy {policy}'.format(policy=PolicyName))
 
@@ -133,10 +133,10 @@ class Statement(object):
     @classmethod
     def from_dict(cls, dict):
         policy = cls()
-        policy.Effect = dict['Effect'] if 'Effect' in dict else None
-        policy.Principal = dict['Principal'] if 'Principal' in dict else None
-        policy.Action = dict['Action'] if 'Action' in dict else None
-        policy.Resource = dict['Resource'] if 'Resource' in dict else None
+        policy.Effect = dict.get('Effect')
+        policy.Principal = dict.get('Principal')
+        policy.Action = dict.get('Action')
+        policy.Resource = dict.get('Resource')
         return policy
 
 
@@ -149,7 +149,7 @@ class PolicyDocument(object):
     @classmethod
     def from_dict(cls, dict):
         document = cls()
-        document.Version = dict['Version'] if 'Version' in dict else None
+        document.Version = dict.get('Version')
         if 'Statement' in dict:
             for statement in dict['Statement']:
                 document.Statement.append(Statement.from_dict(statement))
