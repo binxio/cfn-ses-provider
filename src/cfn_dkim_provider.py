@@ -28,9 +28,38 @@ class DKIMProvider(ResourceProvider):
         self.route53 = boto3.client("route53")
 
     def create(self):
-        self.upsert()
+        if not self.check_identity(self.dkim_domain):
+            self.upsert()
+        else:
+            self.fail(f"SES domain identity {self.dkim_domain} already exists")
+
+    def is_update_required(self):
+        old_hosted_zone_id = self.get_old("HostedZoneId", self.get("HostedZoneId"))
+        if old_hosted_zone_id != self.hosted_zone_id:
+            return True
+        old_region = self.get_old("Region", self.get("Region"))
+        if old_region != self.get("Region"):
+            return True
+
+        old_domain = self.get_old("Domain")
+        if not old_domain:
+            old_dkim_domain = self.get_hosted_zone_name(old_hosted_zone_id).rstrip(".")
+        else:
+            old_dkim_domain = old_domain.rstrip(".")
+
+        if old_dkim_domain != self.dkim_domain:
+            return True
+        return False
 
     def update(self):
+        if not self.is_update_required():
+            self.success("no changes")
+            return
+
+        if self.check_identity(self.dkim_domain):
+            self.fail(f"new SES domain identity {self.dkim_domain} already exists")
+            return
+
         self.upsert()
 
     def delete(self):
@@ -44,6 +73,17 @@ class DKIMProvider(ResourceProvider):
             domain = self.get_hosted_zone_name(hosted_zone_id).rstrip(".")
         self.delete_identity(domain)
         self.delete_dns_records(hosted_zone_id, domain)
+
+    def check_identity(self, domain):
+        dkim_domain = domain.rstrip(".")
+        ses = boto3.client("ses", region_name=self.get("Region"))
+        for response in ses.get_paginator("list_identities").paginate(
+            IdentityType="Domain"
+        ):
+            exists = list(filter(lambda d: d == dkim_domain, response["Identities"]))
+            if exists:
+                return True
+        return False
 
     def delete_identity(self, domain):
         ses = boto3.client("ses", region_name=self.get("Region"))
@@ -88,21 +128,24 @@ class DKIMProvider(ResourceProvider):
 
     @property
     def domain(self):
-        if self.get("Domain"):
+        return self.get("Domain")
+
+    @property
+    def dkim_domain(self):
+        if self.domain:
             return self.get("Domain").rstrip(".")
         else:
-            return self.hosted_zone_name.rstrip(".")
+            return self.hosted_zone_name
 
     def create_physical_resource_id(self):
-        return (
-            f"{self.domain}@{self.hosted_zone_id}"
-            if self.domain
-            else self.hosted_zone_id
-        )
+        if self.domain and self.domain.rstrip(".") != self.hosted_zone_name:
+            return f"{self.dkim_domain}@{self.hosted_zone_id}"
+        else:
+            return self.hosted_zone_id
 
     def extract_domain_name_and_zone_from_physical_resource_id(self):
         match = re.fullmatch(
-            r"(?P<domain>[^@]*)(?P<hosted_zone_id>.*)", self.physical_resource_id
+            r"((?P<domain>[^@]*)@)?(?P<hosted_zone_id>.*)", self.physical_resource_id
         )
         return (
             (None, None)
@@ -113,7 +156,7 @@ class DKIMProvider(ResourceProvider):
     def upsert(self):
         batch = {"Changes": []}
         try:
-            domain = self.domain
+            domain = self.dkim_domain
             ses = boto3.client("ses", region_name=self.get("Region"))
             verification_token = ses.verify_domain_identity(Domain=domain)[
                 "VerificationToken"
