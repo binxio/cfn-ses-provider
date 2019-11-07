@@ -32,7 +32,7 @@ deploy: target/$(NAME)-$(VERSION).zip
 deploy-all-regions: deploy
 	@for REGION in $(ALL_REGIONS); do \
 		echo "copying to region $$REGION.." ; \
-		aws s3 --region $(AWS_REGION) \
+		aws s3 --region $$REGION \
 			cp  --acl public-read \
 			s3://$(S3_BUCKET_PREFIX)-$(AWS_REGION)/lambdas/$(NAME)-$(VERSION).zip \
 			s3://$(S3_BUCKET_PREFIX)-$$REGION/lambdas/$(NAME)-$(VERSION).zip; \
