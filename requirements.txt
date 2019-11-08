@@ -1,2 +1,2 @@
 boto3>=1.4.7
-cfn_resource_provider>=0.10.3
+cfn_resource_provider

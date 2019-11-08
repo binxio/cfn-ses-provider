@@ -55,7 +55,9 @@ def wait_for_change_completion(change_id):
 
 
 def create_for_domain(hosted_zone_name, hosted_zone_id, domain_name):
-    dkim_domain = domain_name.rstrip(".") if domain_name else hosted_zone_name.rstrip(".")
+    dkim_domain = (
+        domain_name.rstrip(".") if domain_name else hosted_zone_name.rstrip(".")
+    )
     if domain_name:
         request = Request("Create", hosted_zone_id, domain_name)
     else:
@@ -107,7 +109,6 @@ def create_for_domain(hosted_zone_name, hosted_zone_id, domain_name):
         assert response["Status"] == "FAILED", response["Reason"]
         assert response["Reason"] == f"SES domain identity {dkim_domain} already exists"
 
-
     request = Request(
         "Update", hosted_zone_id, physical_resource_id=physical_resource_id
     )
@@ -129,14 +130,15 @@ def create_for_domain(hosted_zone_name, hosted_zone_id, domain_name):
     else:
         assert physical_resource_id == hosted_zone_id
 
-
     identities = list(
         filter(
             lambda i: i == dkim_domain,
             ses.list_identities(IdentityType="Domain")["Identities"],
         )
     )
-    assert len(identities) == 0, "domain %s is still present as a SES identity" % dkim_domain
+    assert len(identities) == 0, (
+        "domain %s is still present as a SES identity" % dkim_domain
+    )
 
     records = route53.list_resource_record_sets(HostedZoneId=hosted_zone_id)[
         "ResourceRecordSets"

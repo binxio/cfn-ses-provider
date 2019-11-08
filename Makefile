@@ -71,34 +71,28 @@ test: venv
 	cd src && \
 	PYTHONPATH=$(PWD)/src pytest ../tests/*.py
 
-autopep:
-	autopep8 --experimental --in-place --max-line-length 132 src/*.py tests/*.py
+fmt:
+	black src/*.py tests/*.py
 
-deploy-provider: COMMAND=$(shell if aws cloudformation get-template-summary --stack-name $(NAME) >/dev/null 2>&1; then \
-			echo update; else echo create; fi)
 deploy-provider: check_prefix
-	aws cloudformation $(COMMAND)-stack \
+	aws --region $(AWS_REGION) cloudformation deploy \
 		--capabilities CAPABILITY_IAM \
 		--stack-name $(NAME) \
-		--template-body file://cloudformation/cfn-resource-provider.yaml \
-		--parameters \
-			ParameterKey=S3BucketPrefix,ParameterValue=$(S3_BUCKET_PREFIX) \
-			ParameterKey=CFNCustomProviderZipFileName,ParameterValue=lambdas/$(NAME)-$(VERSION).zip
-	aws cloudformation wait stack-$(COMMAND)-complete  --stack-name $(NAME) 
+		--template-file ./cloudformation/cfn-resource-provider.yaml \
+		--parameter-overrides LambdaS3Bucket=$(S3_BUCKET_PREFIX)-$(AWS_REGION) \
+			CFNCustomProviderZipFileName=lambdas/$(NAME)-$(VERSION).zip
 
 delete-provider:
-	aws cloudformation delete-stack --stack-name $(NAME)
-	aws cloudformation wait stack-delete-complete  --stack-name $(NAME)
+	aws --region $(AWS_REGION) cloudformation delete-stack --stack-name $(NAME)
+	aws --region $(AWS_REGION) cloudformation wait stack-delete-complete  --stack-name $(NAME)
 
 
-demo: COMMAND=$(shell if aws cloudformation get-template-summary --stack-name $(NAME)-demo >/dev/null 2>&1 ; then echo update; else echo create; fi)
 demo:
-	aws cloudformation $(COMMAND)-stack --stack-name $(NAME)-demo \
+	aws --region $(AWS_REGION) cloudformation deploy  --stack-name $(NAME)-demo \
 		--capabilities CAPABILITY_IAM \
-		--template-body file://cloudformation/demo-stack.yaml 
-	aws cloudformation wait stack-$(COMMAND)-complete  --stack-name $(NAME)-demo
+		--template-file ./cloudformation/demo-stack.yaml 
 
 delete-demo:
-	aws cloudformation delete-stack --stack-name $(NAME)-demo 
-	aws cloudformation wait stack-delete-complete  --stack-name $(NAME)-demo
+	aws --region $(AWS_REGION) cloudformation delete-stack --stack-name $(NAME)-demo 
+	aws --region $(AWS_REGION) cloudformation wait stack-delete-complete  --stack-name $(NAME)-demo
 
