@@ -34,6 +34,7 @@ Resources:
             Action:
               - ses:VerifyDomainDkim
               - ses:DeleteIdentity
+              - ses:ListIdentities
               - ses:VerifyDomainIdentity
             Resource: '*'
           - Effect: Allow

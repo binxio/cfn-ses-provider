@@ -52,7 +52,7 @@ class DkimTokensProvider(ResourceProvider):
             )
             self.set_attribute(
                 "DNSResourceRecords",
-                list(map(lambda t: [{"Value": f"{t}.dkim.amazonses.com"}], tokens)),
+                list(map(lambda t: [f"{t}.dkim.amazonses.com"], tokens)),
             )
         except Exception as e:
             self.fail(f"could not get domain dkim tokens for {self.domain}, {e}")

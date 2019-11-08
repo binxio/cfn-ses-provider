@@ -80,7 +80,7 @@ deploy-provider: check_prefix
 		--stack-name $(NAME) \
 		--template-file ./cloudformation/cfn-resource-provider.yaml \
 		--parameter-overrides LambdaS3Bucket=$(S3_BUCKET_PREFIX)-$(AWS_REGION) \
-			CFNCustomProviderZipFileName=lambdas/$(NAME)-$(VERSION).zip
+			CFNSESProviderZipFileName=lambdas/$(NAME)-$(VERSION).zip
 
 delete-provider:
 	aws --region $(AWS_REGION) cloudformation delete-stack --stack-name $(NAME)

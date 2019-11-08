@@ -37,7 +37,7 @@ class DomainIdentityProvider(ResourceProvider):
     def old_region(self):
         return self.get_old("Region", self.region)
 
-    def verify(self):
+    def get_token(self):
         try:
             ses = boto3.client("ses", region_name=self.region)
             response = ses.verify_domain_identity(Domain=self.domain)
@@ -47,7 +47,7 @@ class DomainIdentityProvider(ResourceProvider):
             self.set_attribute("VerificationToken", token)
             self.set_attribute("DNSRecordType", "TXT")
             self.set_attribute("DNSRecordName", f"_amazonses.{self.domain}.")
-            self.set_attribute("DNSResourceRecords", [{"Value": f'"{token}"'}])
+            self.set_attribute("DNSResourceRecords", [f'"{token}"'])
         except Exception as e:
             self.fail(
                 f"could not request domain identity verification for {self.domain}, {e}"
@@ -67,7 +67,7 @@ class DomainIdentityProvider(ResourceProvider):
 
     def create(self):
         if not self.identity_already_exists():
-            self.verify()
+            self.get_token()
         else:
             self.fail(
                 f"SES domain identity {self.domain} already exists in region {self.region}"
@@ -82,7 +82,7 @@ class DomainIdentityProvider(ResourceProvider):
                 f"cannot change domain identity to {self.domain} as it already exists in region {self.region}"
             )
             return
-        self.verify()
+        self.get_token()
 
     def delete(self):
         if self.physical_resource_id != "could-not-create":

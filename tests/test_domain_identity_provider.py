@@ -13,8 +13,8 @@ def check_verification_response(name, region, response: dict):
     assert dns_record_type == "TXT"
     assert isinstance(dns_resource_records, list)
     assert len(dns_resource_records) == 1
-    assert isinstance(dns_resource_records[0], dict)
-    value = dns_resource_records[0].get("Value")
+    assert isinstance(dns_resource_records[0], str)
+    value = dns_resource_records[0]
     assert value.startswith('"')
     assert value.endswith('"')
     assert data.get("VerificationToken") == value.strip('"')

@@ -20,8 +20,8 @@ def check_dkim_tokens(name, region, response: dict):
     for i, rr in enumerate(dns_resource_records):
         assert isinstance(rr, list), "DNSResourceRecords {i} should a list"
         assert len(rr) == 1, "expected the list to be of length 1"
-        assert isinstance(rr[0], dict), "expected ResourceRecord to be dict"
-        value = rr[0].get("Value")
+        assert isinstance(rr[0], str), "expected ResourceRecord to be str"
+        value = rr[0]
         assert value == f"{dkim_tokens[i]}.dkim.amazonses.com"
 
     for i, dns_name in enumerate(dns_record_names):
