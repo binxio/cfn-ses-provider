@@ -69,7 +69,7 @@ def test_create():
 
 class Request(dict):
     def __init__(
-        self, request_type, domain=None, region=None, physical_resource_id=None
+        self, request_type, domain=None, region="eu-west-1", physical_resource_id=None
     ):
         request_id = "request-%s" % uuid.uuid4()
         self.update(

@@ -5,14 +5,10 @@ from cfn_resource_provider import ResourceProvider
 
 request_schema = {
     "type": "object",
-    "required": ["Domain"],
+    "required": ["Domain", "Region"],
     "properties": {
         "Domain": {"type": "string", "description": "to get tokens for"},
-        "Region": {
-            "type": "string",
-            "description": "of the SES endpoint to use",
-            "default": "eu-west-1",
-        },
+        "Region": {"type": "string", "description": "of the SES endpoint to use"},
     },
 }
 
