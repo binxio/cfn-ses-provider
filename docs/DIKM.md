@@ -1,5 +1,10 @@
 # Custom::DKIM
-The `Custom::DKIM` creates DomainKeys Identified Email (DKIM) verification record.
+*This custom resource is deprecated. It violates the principle of a CloudFormation resource provider
+by managing multiple physical resources.*
+
+Please use [Custom::DomainIdentity](DomainIdentity.md) and [Custom::DkimTokens](DkimTokens.md) instead.
+
+The `Custom::DKIM` creates a SES domain identity, a SES domain verification DNS record and the associated DKIM DNS records.
 
 ## Syntax
 To declare this entity in your AWS CloudFormation template, use the following syntax:
