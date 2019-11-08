@@ -71,7 +71,7 @@ aws cloudformation deploy \
 	--stack-name cfn-ses-provider \
 	--template-file ./cloudformation/cfn-resource-provider.yaml 
 ```
-This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-ses-provider-0.5.0.zip`.
+This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-ses-provider-0.5.1.zip`.
 
 ## Demo
 To install the demo of this Custom Resource, type:
