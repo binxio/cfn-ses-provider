@@ -69,7 +69,7 @@ test: venv
         python -m compileall src  && \
 	pip --quiet install -r test-requirements.txt && \
 	cd src && \
-	PYTHONPATH=$(PWD)/src pytest ../tests/*.py
+	PYTHONPATH=$(PWD)/src pytest ../tests/test_*.py
 
 fmt:
 	black src/*.py tests/*.py

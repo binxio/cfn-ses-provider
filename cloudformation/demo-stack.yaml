@@ -20,15 +20,12 @@ Resources:
       Region: !Ref 'EmailRegion'
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 
-  VerificationRecord:
-    Type: AWS::Route53::RecordSet
+  VerificationRecords:
+    Type: AWS::Route53::RecordSetGroup
     Properties:
-        HostedZoneId: !Ref 'HostedZone'
         Comment: !Sub 'SES identity for ${ExternalDomainName}'
-        Name: !GetAtt 'DomainIdentity.DNSRecordName'
-        Type: 'TXT'
-        TTL: '60'
-        ResourceRecords: !GetAtt DomainIdentity.DNSResourceRecords
+        HostedZoneId: !Ref 'HostedZone'
+        RecordSets: !GetAtt 'DomainIdentity.RecordSets'
 
   DkimTokens:
     Type: Custom::DkimTokens
@@ -42,16 +39,4 @@ Resources:
     Properties:
       Comment: !Sub 'DKIM records for ${ExternalDomainName}'
       HostedZoneId: !Ref 'HostedZone'
-      RecordSets:
-        - Name: !Select [0, !GetAtt 'DkimTokens.DNSRecordNames' ]
-          ResourceRecords: !Select [0, !GetAtt 'DkimTokens.DNSResourceRecords' ]
-          Type: 'CNAME'
-          TTL: '60'
-        - Name: !Select [1, !GetAtt 'DkimTokens.DNSRecordNames' ]
-          ResourceRecords: !Select [1, !GetAtt 'DkimTokens.DNSResourceRecords' ]
-          Type: 'CNAME'
-          TTL: '60'
-        - Name: !Select [2, !GetAtt 'DkimTokens.DNSRecordNames' ]
-          ResourceRecords: !Select [2, !GetAtt 'DkimTokens.DNSResourceRecords' ]
-          Type: 'CNAME'
-          TTL: '60'
+      RecordSets: !GetAtt 'DkimTokens.RecordSets'

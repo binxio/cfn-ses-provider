@@ -18,14 +18,11 @@ own the domain by adding a Route53 record:
 
 ```yaml
   DomainVerificationRecord:
-    Type: AWS::Route53::RecordSet
+    Type: AWS::Route53::RecordSetGroup
     Properties:
-        HostedZoneId: !Ref 'HostedZone'
         Comment: !Sub 'SES identity for ${ExternalDomainName}'
-        Name: !GetAtt 'DomainIdentity.DNSRecordName'
-        Type: !GetAtt 'DomainIdentity.DNSRecordType'
-        ResourceRecords: !GetAtt 'DomainIdentity.DNSResourceRecords'
-        TTL: '60'
+        HostedZoneId: !Ref 'HostedZone'
+        RecordSets: !Ref 'DomainIdentity.RecordSets'
 ```
 
 ## How do I get DKIM tokens in CloudFormation?
@@ -49,19 +46,7 @@ You can use these values to create the required DKIM DNS records, as follows:
     Type: AWS::Route53::RecordSetGroup
     Properties:
       HostedZoneId: !Ref 'HostedZone'
-      RecordSets:
-        - Name: !Select [0, !GetAtt 'DkimTokens.DNSRecordNames' ]
-          ResourceRecords: !Select [0, !GetAtt 'DkimTokens.DNSResourceRecords' ]
-          Type: 'CNAME'
-          TTL: '60'
-        - Name: !Select [1, !GetAtt 'DkimTokens.DNSRecordNames' ]
-          ResourceRecords: !Select [1, !GetAtt 'DkimTokens.DNSResourceRecords' ]
-          Type: 'CNAME'
-          TTL: '60'
-        - Name: !Select [2, !GetAtt 'DkimTokens.DNSRecordNames' ]
-          ResourceRecords: !Select [2, !GetAtt 'DkimTokens.DNSResourceRecords' ]
-          Type: 'CNAME'
-          TTL: '60'
+      RecordSets: !Ref 'DkimTokens.RecordSets'
 ```
 ## Installation
 To install these custom resources, type:

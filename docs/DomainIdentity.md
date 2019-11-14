@@ -5,11 +5,11 @@ The `Custom::DomainIdentity` creates a verification token for the domain in SES.
 To declare this entity in your AWS CloudFormation template, use the following syntax:
 
 ```yaml
-{
   Type : "Custom::DomainIdentity"
   Properties:
     Domain: String
-    Region: String,
+    Region: String
+    TTL: integer
     ServiceToken : !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
   }
 }
@@ -22,6 +22,7 @@ You can specify the following properties:
 
     "Domain" - identity to create 
     "Region" - to create the identity in
+    "TTL" - for the DNS records
     "ServiceToken" - pointing to the domain identity provider
 
 ## Return values
@@ -30,21 +31,15 @@ You can specify the following properties:
 With 'Fn::GetAtt' the following values are available:
 
 - `VerificationToken` - for the `Domain`
-- `DNSRecordName` - of the validation token DNS entry
-- `DNSRecordType` - of the DNS entry
-- `DNSResourceRecords` - for the DNS entry
+- `RecordSets` - Route53 recordset to validate the domain
 
-You can use these values to create the required DNS record to proof ownership of the domain tot AWS, as follows:
+You can proof ownership of the domain to AWS, as follows:
 
 ```yaml
   VerificationTokenRecord:
-    Type: AWS::Route53::RecordSet
+    Type: AWS::Route53::RecordSetGroup
     Properties:
-        HostedZoneId: !Ref 'HostedZone'
         Comment: !Sub 'SES identity validation for ${ExternalDomainName}'
-        Name: !GetAtt 'DomainIdentity.DNSRecordName'
-        Type: !GetAtt 'DomainIdentity.DNSRecordType'
-        ResourceRecords: !GetAtt 'DomainIdentity.DNSResourceRecords'
-        TTL: '60'
-
+        HostedZoneId: !Ref 'HostedZone'
+        RecordSets: !Ref 'DomainIdentity.RecordSets'
 ```
