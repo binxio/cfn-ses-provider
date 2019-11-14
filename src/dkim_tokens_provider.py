@@ -51,7 +51,7 @@ class DkimTokensProvider(ResourceProvider):
                 "Name": f"{token}._domainkey.{self.domain}.",
                 "Type": "CNAME",
                 "TTL": self.ttl,
-                "DNSResourceRecords": [f"{token}.dkim.amazonses.com"],
+                "ResourceRecords": [f"{token}.dkim.amazonses.com"],
             }
             for token in tokens
         ]
@@ -75,7 +75,7 @@ class DkimTokensProvider(ResourceProvider):
             )
             self.set_attribute(
                 "DNSResourceRecords",
-                list(map(lambda rs: rs["DNSResourceRecords"], record_sets)),
+                list(map(lambda rs: rs["ResourceRecords"], record_sets)),
             )
         except Exception as e:
             self.fail(f"could not get domain dkim tokens for {self.domain}, {e}")

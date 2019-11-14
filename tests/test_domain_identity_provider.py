@@ -19,12 +19,13 @@ def check_verification_response(name, region, response: dict):
     assert value.endswith('"')
     assert data.get("VerificationToken") == value.strip('"')
     record_sets = data.get("RecordSets")
+    assert isinstance(record_sets, list)
     assert len(record_sets) == 1
     record_set = record_sets[0]
     assert record_set["Name"] == data.get("DNSRecordName")
     assert record_set["Type"] == data.get("DNSRecordType")
     assert record_set["TTL"] == 60
-    assert record_set["DNSResourceRecords"] == data.get("DNSResourceRecords")
+    assert record_set["ResourceRecords"] == data.get("DNSResourceRecords")
 
 
 def test_create():
