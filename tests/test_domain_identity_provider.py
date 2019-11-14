@@ -24,7 +24,7 @@ def check_verification_response(name, region, response: dict):
     record_set = record_sets[0]
     assert record_set["Name"] == data.get("DNSRecordName")
     assert record_set["Type"] == data.get("DNSRecordType")
-    assert record_set["TTL"] == 60
+    assert record_set["TTL"] == "60"
     assert record_set["ResourceRecords"] == data.get("DNSResourceRecords")
 
 

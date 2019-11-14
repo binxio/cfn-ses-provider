@@ -50,7 +50,7 @@ class DkimTokensProvider(ResourceProvider):
             {
                 "Name": f"{token}._domainkey.{self.domain}.",
                 "Type": "CNAME",
-                "TTL": self.ttl,
+                "TTL": str(self.ttl),
                 "ResourceRecords": [f"{token}.dkim.amazonses.com"],
             }
             for token in tokens

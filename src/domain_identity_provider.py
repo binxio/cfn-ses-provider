@@ -63,7 +63,7 @@ class DomainIdentityProvider(ResourceProvider):
                     {
                         "Name": self.get_attribute("DNSRecordName"),
                         "Type": self.get_attribute("DNSRecordType"),
-                        "TTL": self.ttl,
+                        "TTL": str(self.ttl),
                         "ResourceRecords": self.get_attribute("DNSResourceRecords"),
                     }
                 ],

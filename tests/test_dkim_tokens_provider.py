@@ -32,7 +32,7 @@ def check_dkim_tokens(name, region, response: dict):
     for i, record_set in enumerate(record_sets):
         assert record_set["Name"] == f"{dkim_tokens[i]}._domainkey.{name}."
         assert record_set["Type"] == "CNAME"
-        assert record_set["TTL"] == 60
+        assert record_set["TTL"] == "60"
         assert record_set["ResourceRecords"] == [f"{dkim_tokens[i]}.dkim.amazonses.com"]
 
 
