@@ -3,7 +3,7 @@ include Makefile.mk
 NAME=cfn-ses-provider
 S3_BUCKET_PREFIX=binxio-public
 AWS_REGION=eu-central-1
-ALL_REGIONS=$(shell printf "import boto3\nprint '\\\n'.join(map(lambda r: r['RegionName'], boto3.client('ec2').describe_regions()['Regions']))\n" | python | grep -v '^$(AWS_REGION)$$')
+ALL_REGIONS=$(shell printf "import boto3\nprint('\\\n'.join(map(lambda r: r['RegionName'], boto3.client('ec2').describe_regions()['Regions'])))\n" | python | grep -v '^$(AWS_REGION)$$')
 
 .PHONY: help deploy deploy-all-regions release clean test deploy-provider delete-provider demo delete-demo check_prefix
 

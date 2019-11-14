@@ -25,7 +25,7 @@ class DomainIdentityProvider(ResourceProvider):
 
     @property
     def old_domain(self):
-        return self.get_old("Region", self.domain).rstrip(".")
+        return self.get_old("Domain", self.domain).rstrip(".")
 
     @property
     def region(self):
