@@ -1,7 +1,6 @@
  #!/bin/bash
 ## This script will remove all _domainkey and _amazonses records from hosted zones ending in .internal.
 ## and delete the hosted zone.
-export AWS_PROFILE=binx-io
 for HOSTED_ZONE_ID in $(aws route53 list-hosted-zones --query 'HostedZones[?ends_with(Name, `.internal.`)].Id'  --output text); do
 	CHANGE_BATCH="$(aws route53 list-resource-record-sets \
 		--hosted-zone-id $HOSTED_ZONE_ID \
@@ -11,5 +10,7 @@ for HOSTED_ZONE_ID in $(aws route53 list-hosted-zones --query 'HostedZones[?ends
 
 	aws route53 delete-hosted-zone --id $HOSTED_ZONE_ID
 done
-
-	
+for ID in $(aws ses list-identities --query 'Identities[?ends_with(@, `.internal`)]'  --output text); do
+	echo "INFO: deleting domain identity $ID"
+	aws ses delete-identity --identity $ID
+done

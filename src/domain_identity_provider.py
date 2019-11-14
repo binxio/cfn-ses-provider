@@ -1,4 +1,5 @@
 import boto3
+from copy import deepcopy
 from botocore.exceptions import ClientError
 from cfn_resource_provider import ResourceProvider
 
@@ -9,11 +10,7 @@ request_schema = {
     "properties": {
         "Domain": {"type": "string", "description": "to get tokens for"},
         "Region": {"type": "string", "description": "of the SES endpoint to use"},
-        "TTL": {
-            "type": "integer",
-            "description": "of the resource record set",
-            "default": 60,
-        },
+        "RecordSetDefaults": {"type": "object", "default": {"TTL": "60"}},
     },
 }
 
@@ -22,16 +19,9 @@ class DomainIdentityProvider(ResourceProvider):
     def __init__(self):
         self.request_schema = request_schema
 
-    def convert_property_types(self):
-        self.heuristic_convert_property_types(self.properties)
-
     @property
     def domain(self):
         return self.get("Domain").rstrip(".")
-
-    @property
-    def ttl(self):
-        return self.get("TTL")
 
     @property
     def old_domain(self):
@@ -54,20 +44,15 @@ class DomainIdentityProvider(ResourceProvider):
             token = response["VerificationToken"]
             self.set_attribute("VerificationToken", token)
 
-            self.set_attribute("DNSRecordType", "TXT")
-            self.set_attribute("DNSRecordName", f"_amazonses.{self.domain}.")
-            self.set_attribute("DNSResourceRecords", [f'"{token}"'])
-            self.set_attribute(
-                "RecordSets",
-                [
-                    {
-                        "Name": self.get_attribute("DNSRecordName"),
-                        "Type": self.get_attribute("DNSRecordType"),
-                        "TTL": str(self.ttl),
-                        "ResourceRecords": self.get_attribute("DNSResourceRecords"),
-                    }
-                ],
+            recordset = deepcopy(self.get("RecordSetDefaults"))
+            recordset.update(
+                {
+                    "Type": "TXT",
+                    "Name": f"_amazonses.{self.domain}.",
+                    "ResourceRecords": [f'"{token}"'],
+                }
             )
+            self.set_attribute("RecordSets", [recordset])
         except Exception as e:
             self.fail(
                 f"could not request domain identity verification for {self.domain}, {e}"

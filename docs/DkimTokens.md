@@ -9,19 +9,21 @@ To declare this entity in your AWS CloudFormation template, use the following sy
   Properties:
     Domain: String
     Region: String
-    TTL: integer
+    RecordSetDefaults:
+      TTL: 60
     ServiceToken : !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
 It will request the DKIM tokens from SES for the `Domain` in the `Region`. It will return DNS
 record sets required to register the DKIM tokens.
 
+ 
 ## Properties
 You can specify the following properties:
 
-    "Domain" - to generate the tokens for.
-    "Region" - to get the tokens from.
-    "TTL" - for the DNS records, default 60
-    "ServiceToken" - pointing to the DKIM token provider
+    "Domain" - identity to create 
+    "Region" - to create the identity in
+    "RecordSetDefaults" - any default values for the resulting RecordSet
+    "ServiceToken" - pointing to the domain identity provider
 
 ## Return values
 'Ref' will return `Domain`@`Region`.

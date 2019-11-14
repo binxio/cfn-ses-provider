@@ -10,24 +10,6 @@ def check_dkim_tokens(name, region, response: dict):
     assert isinstance(dkim_tokens, list), "DkimTokens should be a list"
     record_sets = data.get("RecordSets")
     assert isinstance(record_sets, list), "RecordSets should be a list"
-    dns_record_names = data.get("DNSRecordNames")
-    assert isinstance(dns_record_names, list), "DNSRecordNames should be a list"
-    dns_record_types = data.get("DNSRecordTypes")
-    assert isinstance(dns_record_types, list), "DNSRecordTypes should be list"
-    dns_resource_records = data.get("DNSResourceRecords")
-    assert isinstance(dns_resource_records, list), "DNSRecordRecords should be list"
-    assert not list(
-        filter(lambda t: t != "CNAME", dns_record_types)
-    ), "DNSResourceTypes should all be CNAME"
-    for i, rr in enumerate(dns_resource_records):
-        assert isinstance(rr, list), "DNSResourceRecords {i} should a list"
-        assert len(rr) == 1, "expected the list to be of length 1"
-        assert isinstance(rr[0], str), "expected ResourceRecord to be str"
-        value = rr[0]
-        assert value == f"{dkim_tokens[i]}.dkim.amazonses.com"
-
-    for i, dns_name in enumerate(dns_record_names):
-        assert dns_name == f"{dkim_tokens[i]}._domainkey.{name}."
 
     for i, record_set in enumerate(record_sets):
         assert record_set["Name"] == f"{dkim_tokens[i]}._domainkey.{name}."

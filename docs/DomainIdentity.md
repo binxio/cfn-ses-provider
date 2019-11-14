@@ -9,20 +9,20 @@ To declare this entity in your AWS CloudFormation template, use the following sy
   Properties:
     Domain: String
     Region: String
-    TTL: integer
+    RecordSetDefaults:
+      TTL: 60
     ServiceToken : !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
-  }
-}
+```
 It will request a Domain verification token from SES for the `Domain` in the `Region`. It will also return 
 the DNS record name, type and value to provide ownership of the domain in DNS. 
 
-```
+
 ## Properties
 You can specify the following properties:
 
     "Domain" - identity to create 
     "Region" - to create the identity in
-    "TTL" - for the DNS records
+    "RecordSetDefaults" - for the resulting DNS records, defaults to {"TTL": 60}
     "ServiceToken" - pointing to the domain identity provider
 
 ## Return values
