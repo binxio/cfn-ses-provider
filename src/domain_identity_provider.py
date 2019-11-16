@@ -1,39 +1,12 @@
 import boto3
 from copy import deepcopy
 from botocore.exceptions import ClientError
-from cfn_resource_provider import ResourceProvider
+from ses_provider import SESProvider
 
 
-request_schema = {
-    "type": "object",
-    "required": ["Domain", "Region"],
-    "properties": {
-        "Domain": {"type": "string", "description": "to get tokens for"},
-        "Region": {"type": "string", "description": "of the SES endpoint to use"},
-        "RecordSetDefaults": {"type": "object", "default": {"TTL": "60"}},
-    },
-}
-
-
-class DomainIdentityProvider(ResourceProvider):
+class DomainIdentityProvider(SESProvider):
     def __init__(self):
-        self.request_schema = request_schema
-
-    @property
-    def domain(self):
-        return self.get("Domain").rstrip(".")
-
-    @property
-    def old_domain(self):
-        return self.get_old("Domain", self.domain).rstrip(".")
-
-    @property
-    def region(self):
-        return self.get("Region")
-
-    @property
-    def old_region(self):
-        return self.get_old("Region", self.region)
+        super().__init__()
 
     def get_token(self):
         try:
@@ -52,6 +25,8 @@ class DomainIdentityProvider(ResourceProvider):
                     "ResourceRecords": [f'"{token}"'],
                 }
             )
+            self.set_attribute("Domain", self.domain)
+            self.set_attribute("Region", self.region)
             self.set_attribute("RecordSets", [recordset])
         except Exception as e:
             self.fail(
@@ -59,16 +34,6 @@ class DomainIdentityProvider(ResourceProvider):
             )
             if not self.physical_resource_id:
                 self.physical_resource_id = "could-not-create"
-
-    def identity_already_exists(self) -> bool:
-        ses = boto3.client("ses", region_name=self.region)
-        for response in ses.get_paginator("list_identities").paginate(
-            IdentityType="Domain"
-        ):
-            exists = list(filter(lambda d: d == self.domain, response["Identities"]))
-            if exists:
-                return True
-        return False
 
     def create(self):
         if not self.identity_already_exists():

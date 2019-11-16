@@ -33,8 +33,8 @@ Resources:
   DkimTokens:
     Type: Custom::DkimTokens
     Properties:
-      Domain: !Ref 'ExternalDomainName'
-      Region: !Ref 'EmailRegion'
+      Domain: !GetAtt 'DomainIdentity.Domain'
+      Region: !GetAtt 'DomainIdentity.Region'
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
 This will return the DKIM tokens and the DNS entries as attributes, so that

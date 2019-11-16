@@ -8,6 +8,9 @@ def check_verification_response(name, region, response: dict):
     data = response.get("Data", {})
     token = data.get("VerificationToken")
     assert token
+    assert data.get("Domain") == name.rstrip(".")
+    assert data.get("Region") == region
+
     record_sets = data.get("RecordSets")
     assert isinstance(record_sets, list)
     assert len(record_sets) == 1

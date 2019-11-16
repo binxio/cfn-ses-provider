@@ -1,6 +1,25 @@
 import uuid
+import boto3
+import pytest
 
 from ses import handler
+
+
+@pytest.fixture
+def domain_identity():
+    domain = f"{uuid.uuid4()}.internal"
+    try:
+        for region in ["eu-west-1", "eu-central-1"]:
+            ses = boto3.client("ses", region_name=region)
+            ses.verify_domain_identity(Domain=domain)
+        yield domain
+    finally:
+        for region in ["eu-west-1", "eu-central-1"]:
+            ses = boto3.client("ses", region_name=region)
+            try:
+                ses.delete_identity(Identity=domain)
+            except Exception as e:
+                print(e)
 
 
 def check_dkim_tokens(name, region, response: dict):
@@ -18,8 +37,8 @@ def check_dkim_tokens(name, region, response: dict):
         assert record_set["ResourceRecords"] == [f"{dkim_tokens[i]}.dkim.amazonses.com"]
 
 
-def test_create():
-    name = f"{uuid.uuid4()}.internal"
+def test_create(domain_identity):
+    name = domain_identity
     try:
         request = Request("Create", name)
         response = handler(request, {})

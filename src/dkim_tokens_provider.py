@@ -1,39 +1,12 @@
 import boto3
 from copy import deepcopy
 from typing import List
-from cfn_resource_provider import ResourceProvider
+from ses_provider import SESProvider
 
 
-request_schema = {
-    "type": "object",
-    "required": ["Domain", "Region"],
-    "properties": {
-        "Domain": {"type": "string", "description": "to get DKIM tokens for"},
-        "Region": {"type": "string", "description": "of the SES endpoint to use"},
-        "RecordSetDefaults": {"type": "object", "default": {"TTL": "60"}},
-    },
-}
-
-
-class DkimTokensProvider(ResourceProvider):
+class DkimTokensProvider(SESProvider):
     def __init__(self):
-        self.request_schema = request_schema
-
-    @property
-    def domain(self):
-        return self.get("Domain").rstrip(".")
-
-    @property
-    def old_domain(self):
-        return self.get_old("Region", self.domain).rstrip(".")
-
-    @property
-    def region(self):
-        return self.get("Region")
-
-    @property
-    def old_region(self):
-        return self.get_old("Region", self.region)
+        super().__init__()
 
     def make_record_sets(self, tokens: List[str]) -> List[dict]:
         result = []
@@ -50,6 +23,10 @@ class DkimTokensProvider(ResourceProvider):
         return result
 
     def get_tokens(self):
+        if not self.identity_already_exists():
+            self.fail(f"the domain identity {self.domain} does not exist")
+            return
+
         try:
             ses = boto3.client("ses", region_name=self.region)
             response = ses.verify_domain_dkim(Domain=self.domain)
@@ -69,7 +46,8 @@ class DkimTokensProvider(ResourceProvider):
         self.get_tokens()
 
     def update(self):
-        self.get_tokens()
+        if self.identity_already_exists():
+            self.get_tokens()
 
     def delete(self):
         pass

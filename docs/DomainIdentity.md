@@ -32,6 +32,8 @@ With 'Fn::GetAtt' the following values are available:
 
 - `VerificationToken` - for the `Domain`
 - `RecordSets` - Route53 recordset to validate the domain
+- `Domain` - the name of the domain identity.
+- `Region` - the region of the domain identity.
 
 You can proof ownership of the domain to AWS, as follows:
 
