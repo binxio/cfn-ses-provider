@@ -13,10 +13,16 @@ request_schema = {
 }
 
 
-class SESActiveReceiptRuleSetProvider(ResourceProvider):
+class ActiveReceiptRuleSetProvider(ResourceProvider):
     def __init__(self):
         self.request_schema = request_schema
         self._ses = None
+
+    def is_supported_resource_type(self):
+        return self.resource_type in [
+            "Custom::SESActiveReceiptRuleSet",
+            "Custom::ActiveReceiptRuleSet",
+        ]
 
     @property
     def rule_set_name(self):
@@ -71,7 +77,7 @@ class SESActiveReceiptRuleSetProvider(ResourceProvider):
             )
 
 
-provider = SESActiveReceiptRuleSetProvider()
+provider = ActiveReceiptRuleSetProvider()
 
 
 def handler(request, context):

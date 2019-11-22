@@ -3,28 +3,35 @@ Description: Demo SES provider
 Parameters:
   ExternalDomainName:
     Type: String
-    Default: ses.cfn.internal
-  EmailRegion:
-    Type: String
-    Default: eu-west-1
-Resources:
-  HostedZone:
-    Type: AWS::Route53::HostedZone
-    Properties:
-      Name: !Ref 'ExternalDomainName'
+    Default: 'mark.binx.dev'
+  ExternalHostedZoneId:
+    Type: 'String'
+    Default: '/hostedzone/Z7B3PELWF2HMB'
 
+Resources:
   DomainIdentity:
     Type: Custom::DomainIdentity
     Properties:
       Domain: !Ref 'ExternalDomainName'
-      Region: !Ref 'EmailRegion'
+      Region: !Ref 'AWS::Region'
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
+
+  VerifiedIdentity:
+    Type: Custom::VerifiedIdentity
+    DependsOn:
+      - DkimRecords
+      - VerificationRecords
+    Properties:
+      Identity: !GetAtt DomainIdentity.Domain
+      Region: !GetAtt DomainIdentity.Region
+      Dummy: true
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 
   VerificationRecords:
     Type: AWS::Route53::RecordSetGroup
     Properties:
         Comment: !Sub 'SES identity for ${ExternalDomainName}'
-        HostedZoneId: !Ref 'HostedZone'
+        HostedZoneId: !Ref 'ExternalHostedZoneId'
         RecordSets: !GetAtt 'DomainIdentity.RecordSets'
 
   DkimTokens:
@@ -38,5 +45,21 @@ Resources:
     Type: AWS::Route53::RecordSetGroup
     Properties:
       Comment: !Sub 'DKIM records for ${ExternalDomainName}'
-      HostedZoneId: !Ref 'HostedZone'
+      HostedZoneId: !Ref 'ExternalHostedZoneId'
       RecordSets: !GetAtt 'DkimTokens.RecordSets'
+
+  SnsTopic:
+    Type: AWS::SNS::Topic
+
+  IdentityNotifications:
+    Type: Custom::IdentityNotifications
+    Properties:
+      Identity: !GetAtt VerifiedIdentity.Identity
+      Region: !GetAtt VerifiedIdentity.Region
+      BounceTopic: !Ref SnsTopic
+      ComplaintTopic: !Ref  SnsTopic
+      HeadersInBounceNotificationsEnabled: true
+      HeadersInComplaintNotificationsEnabled: true
+      ForwardingEnabled: false
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
+

@@ -95,7 +95,7 @@ def test_activate_receipt_rule_with_rule_set_present():
 def test_delete():
     ses = botocore.session.get_session().create_client("ses")
     stubber = Stubber(ses)
-    stubber.add_response(q
+    stubber.add_response(
         "set_active_receipt_rule_set", no_active_receipt_rule_set_response, {}
     )
     stubber.activate()

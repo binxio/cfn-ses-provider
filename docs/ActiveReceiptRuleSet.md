@@ -1,11 +1,11 @@
-# Custom::SESActiveReceiptRuleSet
-The `Custom::SESActiveReceiptRuleSet` manages the active receipt rule set.
+# Custom::ActiveReceiptRuleSet
+The `Custom::ActiveReceiptRuleSet` manages the active receipt rule set.
 
 ## Syntax
 To declare this entity in your AWS CloudFormation template, use the following syntax:
 
 ```yaml
-  Type : "Custom::SESActiveReceiptRuleSet"
+  Type : "Custom::ActiveReceiptRuleSet"
   Properties:
     RuleSetName: String
     Region: String

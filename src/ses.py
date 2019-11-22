@@ -4,6 +4,8 @@ import cfn_dkim_provider
 import dkim_tokens_provider
 import domain_identity_provider
 import active_rule_set_provider
+import verified_identity_provider
+import identity_notifications_provider
 
 
 def handler(request, context):
@@ -12,7 +14,14 @@ def handler(request, context):
         return dkim_tokens_provider.handler(request, context)
     elif request["ResourceType"] == "Custom::DomainIdentity":
         return domain_identity_provider.handler(request, context)
-    elif request["ResourceType"] == "Custom::SESActiveReceiptRuleSet":
+    elif request["ResourceType"] in [
+        "Custom::SESActiveReceiptRuleSet",
+        "Custom::ActiveReceiptRuleSet",
+    ]:
         return active_rule_set_provider.handler(request, context)
+    elif request["ResourceType"] == "Custom::IdentityNotifications":
+        return identity_notifications_provider.handler(request, context)
+    elif request["ResourceType"] == "Custom::VerifiedIdentity":
+        return verified_identity_provider.handler(request, context)
     else:
         return cfn_dkim_provider.handler(request, context)
