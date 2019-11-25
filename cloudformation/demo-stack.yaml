@@ -1,10 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Demo SES provider
 Parameters:
-  ExternalDomainName:
+  DomainName:
     Type: String
     Default: 'mark.binx.dev'
-  ExternalHostedZoneId:
+  HostedZoneId:
     Type: 'String'
     Default: '/hostedzone/Z7B3PELWF2HMB'
 
@@ -12,7 +12,7 @@ Resources:
   DomainIdentity:
     Type: Custom::DomainIdentity
     Properties:
-      Domain: !Ref 'ExternalDomainName'
+      Domain: !Ref 'DomainName'
       Region: !Ref 'AWS::Region'
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 
@@ -30,8 +30,8 @@ Resources:
   VerificationRecords:
     Type: AWS::Route53::RecordSetGroup
     Properties:
-        Comment: !Sub 'SES identity for ${ExternalDomainName}'
-        HostedZoneId: !Ref 'ExternalHostedZoneId'
+        Comment: !Sub 'SES identity for ${DomainName}'
+        HostedZoneId: !Ref 'HostedZoneId'
         RecordSets: !GetAtt 'DomainIdentity.RecordSets'
 
   DkimTokens:
@@ -44,8 +44,8 @@ Resources:
   DkimRecords:
     Type: AWS::Route53::RecordSetGroup
     Properties:
-      Comment: !Sub 'DKIM records for ${ExternalDomainName}'
-      HostedZoneId: !Ref 'ExternalHostedZoneId'
+      Comment: !Sub 'DKIM records for ${DomainName}'
+      HostedZoneId: !Ref 'HostedZoneId'
       RecordSets: !GetAtt 'DkimTokens.RecordSets'
 
   SnsTopic:

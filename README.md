@@ -94,13 +94,20 @@ aws cloudformation deploy \
 This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-ses-provider-0.6.4.zip`.
 
 ## Demo
+To install the demo you need a domain name and a Route53 hosted zone for the doain.
 To install the demo of this Custom Resource, type:
 
 ```sh
-aws cloudformation deploy --stack-name cfn-ses-provider-demo \
-	--template-file ./cloudformation/demo-stack.yaml
+read -p "domain name: " DOMAIN_NAME
+read -p "hosted zone id: " HOSTED_ZONE
+aws --region eu-west-1 \
+	cloudformation deploy --stack-name cfn-certificate-provider-demo \
+	--template-file cloudformation/demo-stack.yaml \
+	--parameter-overrides DomainName=$DOMAIN_NAME HostedZoneId=$HOSTED_ZONE
 ```
-view the installed identity:
-```
+view the installed identity, the notification attributes and route53 records:
+```sh
 aws --region eu-west-1 ses list-identities
+aws --region eu-west-1 ses get-identity-notification-attributes
+aws route53 get-resource-record-sets --hosted-zone $HOSTED_ZONE
 ```
