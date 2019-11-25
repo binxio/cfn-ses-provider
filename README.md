@@ -1,5 +1,6 @@
 # cfn-ses-provider
-A  CloudFormation custom provider for managing SES Domain Identities and DKIM tokens.
+A  CloudFormation custom provider for managing SES Domain Identities, Identity Notifications, DKIM tokens and the
+active receipt rule set.
 
 ## How do I add SES Domain Identity in CloudFormation?
 It is quite easy: you specify a CloudFormation resource of type [Custom::DomainIdentity](docs/DomainIdentity.md):
@@ -23,6 +24,40 @@ own the domain by adding a Route53 record:
         Comment: !Sub 'SES identity for ${ExternalDomainName}'
         HostedZoneId: !Ref 'HostedZone'
         RecordSets: !Ref 'DomainIdentity.RecordSets'
+```
+
+To wait until the domain identity is verified, add a [Custom::VerifiedIdentity](docs/DomainIdentity.md):
+```yaml
+  VerifiedDomainIdentity:
+    Type: Custom::VerifiedIdentity
+    Properties:
+      Domain: !GetAtt 'DomainIdentity.Domain'
+      Region: !GetAtt 'DomainIdentity.Region'
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
+```
+
+If you wish to configure the notifications, add a [Custom::IdentityNotifications](docs/IdentityNotifications.md):
+```yaml
+  DomainNotifications:
+    Type: Custom::IdentityNotifications
+    Properties:
+      Domain: !GetAtt 'DomainIdentity.Domain'
+      Region: !GetAtt 'DomainIdentity.Region'
+      BounceTopic: !Ref BounceTopic
+      ComplaintTopic: !Ref ComplaintTopic
+      HeadersInBounceNotificationsEnabled: true
+      HeadersInComplaintNotificationsEnabled: true
+      ForwardingEnabled: false
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
+```
+
+If you wish to activate a SES Receipt Rule set, add a [Custom::ActiveReceiptRuleSet][docs/ActiveReceiptRuleSet.md]:
+
+```yaml
+  Type : Custom::ActiveReceiptRuleSet
+  Properties:
+    RuleSetName: !Ref ReceiptRuleSet
+    ServiceToken : !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
 
 ## How do I get DKIM tokens in CloudFormation?
