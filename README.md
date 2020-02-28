@@ -41,7 +41,7 @@ If you wish to configure the notifications, add a [Custom::IdentityNotifications
   DomainNotifications:
     Type: Custom::IdentityNotifications
     Properties:
-      Domain: !GetAtt 'DomainIdentity.Domain'
+      Identity: !GetAtt 'DomainIdentity.Domain'
       Region: !GetAtt 'DomainIdentity.Region'
       BounceTopic: !Ref BounceTopic
       ComplaintTopic: !Ref ComplaintTopic
