@@ -26,7 +26,7 @@ own the domain by adding a Route53 record:
         RecordSets: !Ref 'DomainIdentity.RecordSets'
 ```
 
-To wait until the domain identity is verified, add a [Custom::VerifiedIdentity](docs/DomainIdentity.md):
+To wait until the domain identity is verified, add a [Custom::VerifiedIdentity](docs/VerifiedIdentity.md):
 ```yaml
   VerifiedDomainIdentity:
     Type: Custom::VerifiedIdentity
