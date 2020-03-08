@@ -51,7 +51,7 @@ If you wish to configure the notifications, add a [Custom::IdentityNotifications
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
 
-If you wish to activate a SES Receipt Rule set, add a [Custom::ActiveReceiptRuleSet][docs/ActiveReceiptRuleSet.md]:
+If you wish to activate a SES Receipt Rule set, add a [Custom::ActiveReceiptRuleSet](docs/ActiveReceiptRuleSet.md):
 
 ```yaml
   Type : Custom::ActiveReceiptRuleSet
