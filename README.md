@@ -23,7 +23,7 @@ own the domain by adding a Route53 record:
     Properties:
         Comment: !Sub 'SES identity for ${ExternalDomainName}'
         HostedZoneId: !Ref 'HostedZone'
-        RecordSets: !Ref 'DomainIdentity.RecordSets'
+        RecordSets: !GetAtt 'DomainIdentity.RecordSets'
 ```
 
 To wait until the domain identity is verified, add a [Custom::VerifiedIdentity](docs/VerifiedIdentity.md):
