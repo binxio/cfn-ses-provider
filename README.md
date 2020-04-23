@@ -31,6 +31,7 @@ To wait until the domain identity is verified, add a [Custom::VerifiedIdentity](
   VerifiedDomainIdentity:
     Type: Custom::VerifiedIdentity
     Properties:
+      Identity: !GetAtt 'DomainIdentity.Domain'
       Domain: !GetAtt 'DomainIdentity.Domain'
       Region: !GetAtt 'DomainIdentity.Region'
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
@@ -54,10 +55,10 @@ If you wish to configure the notifications, add a [Custom::IdentityNotifications
 If you wish to activate a SES Receipt Rule set, add a [Custom::ActiveReceiptRuleSet](docs/ActiveReceiptRuleSet.md):
 
 ```yaml
-  Type : Custom::ActiveReceiptRuleSet
+  Type: Custom::ActiveReceiptRuleSet
   Properties:
     RuleSetName: !Ref ReceiptRuleSet
-    ServiceToken : !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
+    ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
 
 ## How do I get DKIM tokens in CloudFormation?
