@@ -14,8 +14,7 @@ Resources:
       Region: !Ref 'EmailRegion'
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
-This will create a domain identity in the region, and return the DNS entry as attributes, so you can proof you
-own the domain by adding a Route53 record:
+This will create a domain identity in the region, and return the DNS entry as attributes, so you can proof you own the domain by adding a Route53 record:
 
 ```yaml
   DomainVerificationRecord:
@@ -24,6 +23,10 @@ own the domain by adding a Route53 record:
         Comment: !Sub 'SES identity for ${ExternalDomainName}'
         HostedZoneId: !Ref 'HostedZone'
         RecordSets: !GetAtt 'DomainIdentity.RecordSets'
+	RecordSetDefaults:
+	  TTL: 60
+	  Weight: 1
+	  SetIdentifier: !Ref 'AWS::Region'
 ```
 
 To wait until the domain identity is verified, add a [Custom::VerifiedIdentity](docs/VerifiedIdentity.md):
@@ -32,7 +35,6 @@ To wait until the domain identity is verified, add a [Custom::VerifiedIdentity](
     Type: Custom::VerifiedIdentity
     Properties:
       Identity: !GetAtt 'DomainIdentity.Domain'
-      Domain: !GetAtt 'DomainIdentity.Domain'
       Region: !GetAtt 'DomainIdentity.Region'
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
