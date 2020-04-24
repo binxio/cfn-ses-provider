@@ -1,6 +1,7 @@
 # cfn-ses-provider
-A  CloudFormation custom provider for managing SES Domain Identities, Identity Notifications, DKIM tokens and the
-active receipt rule set.
+A  CloudFormation custom provider for managing SES Domain Identities, Identity Notifications, DKIM tokens and the active receipt rule set.
+
+Read the blog on [How to configure SES domain identities and DKIM records using cloudformation](https://binx.io/blog/2019/11/14/how-to-deploy-aws-ses-domain-identities-dkim-records-using-cloudformation/)
 
 ## How do I add SES Domain Identity in CloudFormation?
 It is quite easy: you specify a CloudFormation resource of type [Custom::DomainIdentity](docs/DomainIdentity.md):
