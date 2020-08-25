@@ -60,6 +60,7 @@ If you wish to activate a SES Receipt Rule set, add a [Custom::ActiveReceiptRule
 ```yaml
   Type: Custom::ActiveReceiptRuleSet
   Properties:
+    Region: !Ref 'AWS::Region'
     RuleSetName: !Ref ReceiptRuleSet
     ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
@@ -98,7 +99,7 @@ aws cloudformation deploy \
 This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-ses-provider-0.6.4.zip`.
 
 ## Demo
-To install the demo you need a domain name and a Route53 hosted zone for the doain.
+To install the demo you need a domain name and a Route53 hosted zone for the domain.
 To install the demo of this Custom Resource, type:
 
 ```sh
