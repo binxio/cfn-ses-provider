@@ -43,5 +43,5 @@ You can proof ownership of the domain to AWS, as follows:
     Properties:
         Comment: !Sub 'SES identity validation for ${ExternalDomainName}'
         HostedZoneId: !Ref 'HostedZone'
-        RecordSets: !Ref 'DomainIdentity.RecordSets'
+        RecordSets: !GetAtt 'DomainIdentity.RecordSets'
 ```
