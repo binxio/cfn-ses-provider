@@ -65,7 +65,7 @@ If you wish to activate a SES Receipt Rule set, add a [Custom::ActiveReceiptRule
     ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
 
-If you wish to autohorize other AWS accounts, IAM users, and AWS services to send for this identity, add an identiy policy:
+If you wish to authorize other AWS accounts, IAM users, and AWS services to send for this identity, add an identity policy:
 ```yaml
   IdentityPolicy:
     Type: Custom::IdentityPolicy
