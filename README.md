@@ -107,7 +107,7 @@ You can use these values to create the required DKIM DNS records, as follows:
     Type: AWS::Route53::RecordSetGroup
     Properties:
       HostedZoneId: !Ref 'HostedZone'
-      RecordSets: !Ref 'DkimTokens.RecordSets'
+      RecordSets: !GetAtt 'DkimTokens.RecordSets'
 ```
 ## Installation
 To install these custom resources, type:
