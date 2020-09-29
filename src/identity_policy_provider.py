@@ -61,6 +61,10 @@ request_schema = {
                             }
                         }
                     }
+                },
+                "Version": {
+                    "type": "string",
+                    "description": "of the policy document"
                 }
             }
         }
