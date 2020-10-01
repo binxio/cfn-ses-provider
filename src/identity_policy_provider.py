@@ -85,22 +85,22 @@ class IdentityPolicyProvider(ResourceProvider):
         self.heuristic_convert_property_types(self.properties)
 
     def create(self):
-        existing_policy = self.get_policy(self.get('Identity'), self.get('PolicyName'))
+        existing_policy = self.get_policy(self.identity, self.policy_name)
         if existing_policy is not None:
-            self.fail(f"identity policy {self.get('PolicyName')} already exists")
+            self.fail(f"identity policy {self.policy_name} already exists")
             return
 
         desired_policy_document = PolicyDocument.from_dict(self.get('PolicyDocument'))
         self.put_policy(desired_policy_document)
 
     def update(self):
-        if self.physical_resource_id != self.get('PolicyName'):
-            self.fail("changing property PolicyName is not allowed")
+        if self.policy_name != self.old_policy_name or self.identity != self.old_identity:
+            self.create()
             return
 
-        current_policy = self.get_policy(self.get('Identity'), self.get('PolicyName'))
+        current_policy = self.get_policy(self.identity, self.policy_name)
         if current_policy is None:
-            self.fail(f"identity policy {self.get('PolicyName')} does not exist")
+            self.fail(f"identity policy {self.policy_name} does not exist")
             return
 
         current_policy_document = PolicyDocument.from_json(current_policy)
@@ -111,26 +111,26 @@ class IdentityPolicyProvider(ResourceProvider):
     def put_policy(self, policy_document):
         try:
             self.ses.put_identity_policy(
-                Identity=self.get('Identity'),
-                PolicyName=self.get('PolicyName'),
+                Identity=self.identity,
+                PolicyName=self.policy_name,
                 Policy=policy_document.to_json())
-            self.physical_resource_id = self.get('PolicyName')
+            self.physical_resource_id = f"{self.identity}/@{self.policy_name}"
         except ClientError as e:
-            self.fail(f"could not set domain identity policy {self.get('PolicyName')}, {e}")
+            self.fail(f"could not set domain identity policy {self.policy_name}, {e}")
             if not self.physical_resource_id:
                 self.physical_resource_id = "could-not-create"
 
     def delete(self):
-        current_policy = self.get_policy(self.get('Identity'), self.get('PolicyName'))
+        current_policy = self.get_policy(self.identity, self.policy_name)
         if current_policy is None:
-            self.fail(f"identity policy {self.get('PolicyName')} does not exist")
+            self.fail(f"identity policy {self.policy_name} does not exist")
             return
 
         if self.physical_resource_id != "could-not-create":
             try:
-                self.ses.delete_identity_policy(Identity=self.get('Identity'), PolicyName=self.get('PolicyName'))
+                self.ses.delete_identity_policy(Identity=self.identity, PolicyName=self.policy_name)
             except ClientError as e:
-                self.fail(f"failed to delete identity policy {self.get('PolicyName')}, {e}")
+                self.fail(f"failed to delete identity policy {self.policy_name}, {e}")
 
     def get_policy(self, identity, policy_name):
         try:
@@ -140,6 +140,22 @@ class IdentityPolicyProvider(ResourceProvider):
             self.fail(
                 f"failed to retrieve identity policy {policy_name}, {e}"
             )
+
+    @property
+    def policy_name(self):
+        return self.get('PolicyName')
+
+    @property
+    def old_policy_name(self):
+        return self.get_old('PolicyName', self.policy_name)
+
+    @property
+    def identity(self):
+        return self.get('Identity')
+
+    @property
+    def old_identity(self):
+        return self.get_old('Identity', self.identity)
 
 
 class Statement(object):
