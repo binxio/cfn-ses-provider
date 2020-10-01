@@ -14,6 +14,8 @@ request_schema = {
         },
         "PolicyName": {
             "type": "string",
+            "maxLength": 64,
+            "pattern": "^[A-Za-z-_]+$",
             "description": "of the policy"
         },
         "PolicyDocument": {
@@ -83,46 +85,54 @@ class IdentityPolicyProvider(ResourceProvider):
         self.heuristic_convert_property_types(self.properties)
 
     def create(self):
-        self.upsert()
-
-    def update(self):
-        self.upsert()
-
-    def upsert(self):
-        current_policy_document = PolicyDocument.from_json(
-            self.get_identity_policy(identity=self.get('Identity'), policy_name=self.get('PolicyName')))
-        desired_policy_document = PolicyDocument.from_dict(self.get('PolicyDocument'))
-
-        if current_policy_document != desired_policy_document:
-            try:
-                self.ses.put_identity_policy(
-                    Identity=self.get('Identity'),
-                    PolicyName=self.get('PolicyName'),
-                    Policy=desired_policy_document.to_json())
-                self.physical_resource_id = self.get('PolicyName')
-            except ClientError as e:
-                self.fail(
-                    f"could not set domain identity policy {self.get('PolicyName')}, {e}"
-                )
-                if not self.physical_resource_id:
-                    self.physical_resource_id = "could-not-create"
-
-    def delete(self):
-        try:
-            current_policies = self.ses.list_identity_policies(Identity=self.get('Identity'))['PolicyNames']
-        except ClientError as e:
-            self.fail("failed to list identity policies")
+        existing_policy = self.get_policy(self.get('Identity'), self.get('PolicyName'))
+        if existing_policy is not None:
+            self.fail(f"identity policy {self.get('PolicyName')} already exists")
             return
 
-        if self.get('PolicyName') in current_policies:
+        desired_policy_document = PolicyDocument.from_dict(self.get('PolicyDocument'))
+        self.put_policy(desired_policy_document)
+
+    def update(self):
+        if self.physical_resource_id != self.get('PolicyName'):
+            self.fail("changing property PolicyName is not allowed")
+            return
+
+        current_policy = self.get_policy(self.get('Identity'), self.get('PolicyName'))
+        if current_policy is None:
+            self.fail(f"identity policy {self.get('PolicyName')} does not exist")
+            return
+
+        current_policy_document = PolicyDocument.from_json(current_policy)
+        desired_policy_document = PolicyDocument.from_dict(self.get('PolicyDocument'))
+        if current_policy_document != desired_policy_document:
+            self.put_policy(desired_policy_document)
+
+    def put_policy(self, policy_document):
+        try:
+            self.ses.put_identity_policy(
+                Identity=self.get('Identity'),
+                PolicyName=self.get('PolicyName'),
+                Policy=policy_document.to_json())
+            self.physical_resource_id = self.get('PolicyName')
+        except ClientError as e:
+            self.fail(f"could not set domain identity policy {self.get('PolicyName')}, {e}")
+            if not self.physical_resource_id:
+                self.physical_resource_id = "could-not-create"
+
+    def delete(self):
+        current_policy = self.get_policy(self.get('Identity'), self.get('PolicyName'))
+        if current_policy is None:
+            self.fail(f"identity policy {self.get('PolicyName')} does not exist")
+            return
+
+        if self.physical_resource_id != "could-not-create":
             try:
                 self.ses.delete_identity_policy(Identity=self.get('Identity'), PolicyName=self.get('PolicyName'))
             except ClientError as e:
-                self.fail(
-                    f"failed to delete identity policy {self.get('PolicyName')}, {e}"
-                )
+                self.fail(f"failed to delete identity policy {self.get('PolicyName')}, {e}")
 
-    def get_identity_policy(self, identity, policy_name):
+    def get_policy(self, identity, policy_name):
         try:
             current_policies = self.ses.get_identity_policies(Identity=identity, PolicyNames=[policy_name])['Policies']
             return current_policies.get(policy_name)
