@@ -65,6 +65,27 @@ If you wish to activate a SES Receipt Rule set, add a [Custom::ActiveReceiptRule
     ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
 
+If you wish to authorize other AWS accounts, IAM users, and AWS services to send for this identity, add an identity policy:
+```yaml
+  IdentityPolicy:
+    Type: Custom::IdentityPolicy
+    Properties:
+      Identity: !GetAtt 'DomainIdentity.Domain'
+      PolicyName: CrossAccountAllow
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - 'arn:aws:iam::000111222333:root'
+            Action:
+              - ses:SendEmail
+              - ses:SendRawEmail
+            Resource: !Sub 'arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/${DomainIdentity.Domain}'
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
+```
+
 ## How do I get DKIM tokens in CloudFormation?
 It is quite easy: you specify a CloudFormation resource of type [Custom::DkimTokens](docs/DkimTokens.md):
 
@@ -86,7 +107,7 @@ You can use these values to create the required DKIM DNS records, as follows:
     Type: AWS::Route53::RecordSetGroup
     Properties:
       HostedZoneId: !Ref 'HostedZone'
-      RecordSets: !Ref 'DkimTokens.RecordSets'
+      RecordSets: !GetAtt 'DkimTokens.RecordSets'
 ```
 ## Installation
 To install these custom resources, type:
@@ -94,7 +115,7 @@ To install these custom resources, type:
 aws cloudformation deploy \
 	--capabilities CAPABILITY_IAM \
 	--stack-name cfn-ses-provider \
-	--template-file ./cloudformation/cfn-resource-provider.yaml 
+	--template-file ./cloudformation/cfn-resource-provider.yaml
 ```
 This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-ses-provider-0.6.4.zip`.
 

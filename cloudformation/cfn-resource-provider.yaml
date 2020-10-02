@@ -48,6 +48,10 @@ Resources:
               - ses:SetIdentityNotificationTopic
               - ses:SetIdentityHeadersInNotificationsEnabled
               - ses:SetIdentityFeedbackForwardingEnabled
+              - ses:ListIdentityPolicies
+              - ses:GetIdentityPolicies
+              - ses:PutIdentityPolicy
+              - ses:DeleteIdentityPolicy
             Resource: '*'
           - Effect: Allow
             Action:
@@ -59,7 +63,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:

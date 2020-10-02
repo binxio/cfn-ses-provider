@@ -6,6 +6,7 @@ import domain_identity_provider
 import active_rule_set_provider
 import verified_identity_provider
 import identity_notifications_provider
+import identity_policy_provider
 
 
 def handler(request, context):
@@ -23,5 +24,7 @@ def handler(request, context):
         return identity_notifications_provider.handler(request, context)
     elif request["ResourceType"] == "Custom::VerifiedIdentity":
         return verified_identity_provider.handler(request, context)
+    elif request["ResourceType"] == "Custom::IdentityPolicy":
+        return identity_policy_provider.handler(request, context)
     else:
         return cfn_dkim_provider.handler(request, context)
