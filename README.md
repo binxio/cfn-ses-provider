@@ -117,7 +117,7 @@ aws cloudformation deploy \
 	--stack-name cfn-ses-provider \
 	--template-file ./cloudformation/cfn-resource-provider.yaml
 ```
-This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-ses-provider-0.6.4.zip`.
+This CloudFormation template will use our pre-packaged provider from `s3://binxio-public-{{your-region}}/lambdas/cfn-ses-provider-0.6.5.zip`.
 
 ## Demo
 To install the demo you need a domain name and a Route53 hosted zone for the domain.
