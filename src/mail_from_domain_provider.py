@@ -9,6 +9,7 @@ class MailFromDomainProvider(SESProvider):
 
     def __init__(self):
         super().__init__()
+        self.request_schema = deepcopy(self.request_schema)
         self.request_schema['required'].append("MailFromSubdomain")
         self.request_schema['properties']['MailFromSubdomain'] = {"type": "string",
                                                                   "description": "subdomain to use as mail from"}
