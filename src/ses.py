@@ -3,8 +3,10 @@ import logging
 import cfn_dkim_provider
 import dkim_tokens_provider
 import domain_identity_provider
+import mail_from_domain_provider
 import active_rule_set_provider
 import verified_identity_provider
+import verified_mail_from_domain_provider
 import identity_notifications_provider
 import identity_policy_provider
 
@@ -26,5 +28,9 @@ def handler(request, context):
         return verified_identity_provider.handler(request, context)
     elif request["ResourceType"] == "Custom::IdentityPolicy":
         return identity_policy_provider.handler(request, context)
+    elif request["ResourceType"] == "Custom::MailFromDomain":
+        return mail_from_domain_provider.handler(request, context)
+    elif request["ResourceType"] == "Custom::VerifiedMailFromDomain":
+        return verified_mail_from_domain_provider.handler(request, context)
     else:
         return cfn_dkim_provider.handler(request, context)
