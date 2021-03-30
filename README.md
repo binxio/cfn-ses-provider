@@ -24,10 +24,6 @@ This will create a domain identity in the region, and return the DNS entry as at
         Comment: !Sub 'SES identity for ${ExternalDomainName}'
         HostedZoneId: !Ref 'HostedZone'
         RecordSets: !GetAtt 'DomainIdentity.RecordSets'
-	RecordSetDefaults:
-	  TTL: 60
-	  Weight: 1
-	  SetIdentifier: !Ref 'AWS::Region'
 ```
 
 To wait until the domain identity is verified, add a [Custom::VerifiedIdentity](docs/VerifiedIdentity.md):
