@@ -56,10 +56,6 @@ You can verify the MAIL FROM domain in Route53 like this:
         Comment: !Sub 'SES MAIL FROM domain for ${ExternalDomainName}'
         HostedZoneId: !Ref 'HostedZone'
         RecordSets: !GetAtt 'MailFromDomain.RecordSets'
-	RecordSetDefaults:
-	  TTL: 60
-	  Weight: 1
-	  SetIdentifier: !Ref 'AWS::Region'
 ```
 
 To wait until the MAIL FROM domain is verified, add a [Custom::VerifiedMailFromDomain](docs/VerifiedMailFromDomain.md):
