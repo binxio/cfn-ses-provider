@@ -84,9 +84,6 @@ class IdentityPolicyProvider(ResourceProvider):
         self.request_schema = request_schema
         self.ses = boto3.client("ses")
 
-    def convert_property_types(self):
-        self.heuristic_convert_property_types(self.properties)
-
     def create(self):
         existing_policy = self.get_policy(self.identity, self.policy_name)
         if existing_policy is not None:

@@ -62,7 +62,7 @@ def test_create():
                 "Delete",
                 name,
                 region=region,
-                physical_resource_id="{name.rstrip('.')}@{region}",
+                physical_resource_id=f"{name.rstrip('.')}@{region}",
             )
             response = handler(request, {})
             assert response["Status"] == "SUCCESS", response["Reason"]
