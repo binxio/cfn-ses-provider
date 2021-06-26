@@ -57,7 +57,7 @@ request_schema = {
 
 class IdentityNotificationsProvider(ResourceProvider):
     def __init__(self):
-        super(IdentityNotificationsProvider, self).__init__()
+        super().__init__()
         self.request_schema = request_schema
         self._ses = None
 

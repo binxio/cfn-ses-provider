@@ -24,6 +24,7 @@ request_schema = {
 
 class DKIMProvider(ResourceProvider):
     def __init__(self):
+        super().__init__()
         self.request_schema = request_schema
         self.route53 = boto3.client("route53")
 

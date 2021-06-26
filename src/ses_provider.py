@@ -17,6 +17,7 @@ request_schema = {
 
 class SESProvider(ResourceProvider):
     def __init__(self):
+        super().__init__()
         self.request_schema = request_schema
 
     @property

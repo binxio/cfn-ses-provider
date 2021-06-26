@@ -13,7 +13,7 @@ lmbda = boto3.client("lambda")
 
 class VerifiedIdentityProvider(ResourceProvider):
     def __init__(self):
-        super(VerifiedIdentityProvider, self).__init__()
+        super().__init__()
         self.request_schema = {
             "type": "object",
             "required": ["Identity", "Region"],

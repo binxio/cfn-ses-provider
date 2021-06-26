@@ -13,7 +13,7 @@ lmbda = boto3.client("lambda")
 
 class VerifiedMailFromDomainProvider(ResourceProvider):
     def __init__(self):
-        super(VerifiedMailFromDomainProvider, self).__init__()
+        super().__init__()
         self.request_schema = {
             "type": "object",
             "required": ["Identity", "Region"],

@@ -15,6 +15,7 @@ request_schema = {
 
 class ActiveReceiptRuleSetProvider(ResourceProvider):
     def __init__(self):
+        super().__init__()
         self.request_schema = request_schema
         self._ses = None
 

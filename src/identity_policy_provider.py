@@ -80,7 +80,7 @@ request_schema = {
 
 class IdentityPolicyProvider(ResourceProvider):
     def __init__(self):
-        super(IdentityPolicyProvider, self).__init__()
+        super().__init__()
         self.request_schema = request_schema
         self.ses = boto3.client("ses")
 
