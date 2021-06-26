@@ -6,24 +6,27 @@ from ses_provider import SESProvider
 
 
 class MailFromDomainProvider(SESProvider):
-
     def __init__(self):
         super().__init__()
         self.request_schema = deepcopy(self.request_schema)
-        self.request_schema['required'].append("MailFromSubdomain")
-        self.request_schema['properties']['MailFromSubdomain'] = {"type": "string",
-                                                                  "description": "subdomain to use as mail from"}
-        self.request_schema['properties']['BehaviorOnMXFailure'] = {"type": "string",
-                                                                    "description": "action to take if "
-                                                                                   "Amazon SES cannot "
-                                                                                   "successfully read the "
-                                                                                   "required MX record "
-                                                                                   "when you send an "
-                                                                                   "email ("
-                                                                                   "UseDefaultValue | "
-                                                                                   "RejectMessage), "
-                                                                                   "default is "
-                                                                                   "UseDefaultValue"}
+        self.request_schema["required"].append("MailFromSubdomain")
+        self.request_schema["properties"]["MailFromSubdomain"] = {
+            "type": "string",
+            "description": "subdomain to use as mail from",
+        }
+        self.request_schema["properties"]["BehaviorOnMXFailure"] = {
+            "type": "string",
+            "description": "action to take if "
+            "Amazon SES cannot "
+            "successfully read the "
+            "required MX record "
+            "when you send an "
+            "email ("
+            "UseDefaultValue | "
+            "RejectMessage), "
+            "default is "
+            "UseDefaultValue",
+        }
 
     @property
     def mail_from_subdomain(self):
@@ -42,7 +45,9 @@ class MailFromDomainProvider(SESProvider):
                 {
                     "Type": "MX",
                     "Name": f"{self.mail_from_subdomain}.{self.domain}.",
-                    "ResourceRecords": [f'"10 feedback-smtp.{self.region}.amazonses.com"'],
+                    "ResourceRecords": [
+                        f'"10 feedback-smtp.{self.region}.amazonses.com"'
+                    ],
                 }
             )
 
@@ -65,8 +70,11 @@ class MailFromDomainProvider(SESProvider):
             if mx_failure_behaviour is None:
                 mx_failure_behaviour = "UseDefaultValue"
 
-            ses.set_identity_mail_from_domain(Identity=self.domain, MailFromDomain=self.mail_from_subdomain,
-                                              BehaviorOnMXFailure=mx_failure_behaviour)
+            ses.set_identity_mail_from_domain(
+                Identity=self.domain,
+                MailFromDomain=self.mail_from_subdomain,
+                BehaviorOnMXFailure=mx_failure_behaviour,
+            )
 
             self.physical_resource_id = f"{self.domain}@{self.region}"
 
@@ -93,7 +101,7 @@ class MailFromDomainProvider(SESProvider):
         self.set_mail_from()
 
     def delete(self):
-        self.properties['mail_from_subdomain'] = ""
+        self.properties["mail_from_subdomain"] = ""
         self.set_mail_from()
 
 

@@ -64,9 +64,10 @@ class DKIMProvider(ResourceProvider):
         self.upsert()
 
     def delete(self):
-        hosted_zone_id, domain = (
-            self.extract_domain_name_and_zone_from_physical_resource_id()
-        )
+        (
+            hosted_zone_id,
+            domain,
+        ) = self.extract_domain_name_and_zone_from_physical_resource_id()
         if hosted_zone_id == "could-not-create":
             return
 

@@ -56,7 +56,9 @@ class VerifiedMailFromDomainProvider(ResourceProvider):
             )
             self.set_attribute("Region", self.region)
             self.set_attribute("Identity", self.identity)
-            self.set_attribute("MailFromDomainStatus", attrs.get("MailFromDomainStatus`"))
+            self.set_attribute(
+                "MailFromDomainStatus", attrs.get("MailFromDomainStatus`")
+            )
         elif status == "Pending":
             self.async_reinvoke()
         else:
