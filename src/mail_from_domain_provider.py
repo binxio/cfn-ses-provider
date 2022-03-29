@@ -46,7 +46,7 @@ class MailFromDomainProvider(SESProvider):
                     "Type": "MX",
                     "Name": f"{self.mail_from_subdomain}.{self.domain}.",
                     "ResourceRecords": [
-                        f'"10 feedback-smtp.{self.region}.amazonses.com"'
+                        f'10 feedback-smtp.{self.region}.amazonses.com'
                     ],
                 }
             )
@@ -56,7 +56,7 @@ class MailFromDomainProvider(SESProvider):
                 {
                     "Type": "TXT",
                     "Name": f"{self.mail_from_subdomain}.{self.domain}.",
-                    "ResourceRecords": ["v=spf1 include:amazonses.com ~all"],
+                    "ResourceRecords": ['"v=spf1 include:amazonses.com ~all"'],
                 }
             )
             return [recordset_mx, recordset_txt]
@@ -72,7 +72,7 @@ class MailFromDomainProvider(SESProvider):
 
             ses.set_identity_mail_from_domain(
                 Identity=self.domain,
-                MailFromDomain=self.mail_from_subdomain,
+                MailFromDomain=f"{self.mail_from_subdomain}.{self.domain}",
                 BehaviorOnMXFailure=mx_failure_behaviour,
             )
 
