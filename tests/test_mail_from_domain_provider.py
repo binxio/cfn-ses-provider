@@ -46,7 +46,7 @@ def test_generate_dns_recordsets_returns_values_when_subdomain():
 
     expected_txt = {
         "Name": "mail.example.com.",
-        "ResourceRecords": ["v=spf1 include:amazonses.com ~all"],
+        "ResourceRecords": ['"v=spf1 include:amazonses.com ~all"'],
         "TTL": "60",
         "Type": "TXT",
     }

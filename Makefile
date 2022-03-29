@@ -58,7 +58,7 @@ target/$(NAME)-$(VERSION).zip: src/*.py requirements.txt
 		chmod ugo+r target/$(NAME)-$(VERSION).zip
 
 venv: requirements.txt
-	virtualenv -p python3 venv  && \
+	virtualenv -p python3.8 venv  && \
 	. ./venv/bin/activate && \
 	pip --quiet install --upgrade pip && \
 	pip --quiet install -r requirements.txt 
