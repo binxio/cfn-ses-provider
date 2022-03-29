@@ -48,6 +48,7 @@ Resources:
               - ses:SetIdentityNotificationTopic
               - ses:SetIdentityHeadersInNotificationsEnabled
               - ses:SetIdentityFeedbackForwardingEnabled
+              - ses:SetIdentityMailFromDomain
               - ses:ListIdentityPolicies
               - ses:GetIdentityPolicies
               - ses:PutIdentityPolicy
