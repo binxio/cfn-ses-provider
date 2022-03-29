@@ -72,7 +72,7 @@ class MailFromDomainProvider(SESProvider):
 
             ses.set_identity_mail_from_domain(
                 Identity=self.domain,
-                MailFromDomain=self.mail_from_subdomain,
+                MailFromDomain=f"{self.mail_from_subdomain}.{self.domain}",
                 BehaviorOnMXFailure=mx_failure_behaviour,
             )
 
