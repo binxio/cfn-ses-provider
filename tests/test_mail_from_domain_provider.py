@@ -1,4 +1,5 @@
 import uuid
+import json
 
 from mail_from_domain_provider import MailFromDomainProvider
 
@@ -34,10 +35,11 @@ def test_generate_dns_recordsets_returns_values_when_subdomain():
     assert mail_from_provider.mail_from_subdomain == "mail"
 
     recordsets = mail_from_provider.generate_dns_recordsets()
+    print(json.dumps(recordsets, indent=2))
     assert len(recordsets) == 2
     expected_mx = {
         "Name": "mail.example.com.",
-        "ResourceRecords": ['"10 feedback-smtp.eu-west-1.amazonses.com"'],
+        "ResourceRecords": ["10 feedback-smtp.eu-west-1.amazonses.com"],
         "TTL": "60",
         "Type": "MX",
     }

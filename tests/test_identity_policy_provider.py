@@ -79,7 +79,7 @@ class Request(dict):
                             {
                                 "Effect": "Allow",
                                 "Principal": {
-                                    "AWS": ["arn:aws:iam::245111612214:root"]
+                                    "AWS": [f"arn:aws:iam::{account_id}:root"]
                                 },
                                 "Action": ["ses:SendEmail", "ses:SendRawEmail"],
                                 "Resource": f"arn:aws:ses:{region}:{account_id}:identity/{identity}",

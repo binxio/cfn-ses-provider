@@ -12,7 +12,7 @@ def test_wildcard():
 
 def test_simple_root():
     identity = f"{uuid.uuid4()}.internal"
-    request = Request("Create", identity, {"AWS": "arn:aws:iam::245111612214:root"})
+    request = Request("Create", identity, {"AWS": "arn:aws:iam::111111111111:root"})
     provider.set_request(request, {})
     assert provider.is_valid_request(), provider.reason
 
@@ -22,7 +22,7 @@ def test_list_of_aws_root():
     request = Request(
         "Create",
         identity,
-        {"AWS": ["arn:aws:iam::245111612214:root", "arn:aws:iam::245111612215:root"]},
+        {"AWS": ["arn:aws:iam::111111111111:root", "arn:aws:iam::222222222222:root"]},
     )
     provider.set_request(request, {})
     assert provider.is_valid_request(), provider.reason
