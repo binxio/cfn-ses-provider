@@ -18,7 +18,7 @@ def check_verification_response(name, region, response: dict):
     assert record_set["Name"] == f"_amazonses.{name}."
     assert record_set["Type"] == "TXT"
     assert record_set["TTL"] == "60"
-    assert record_set["ResourceRecords"] == [f'"{token}"']
+    assert record_set["ResourceRecords"] == [f'{token}']
 
 
 def test_create():
