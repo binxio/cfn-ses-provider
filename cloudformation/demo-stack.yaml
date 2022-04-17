@@ -6,7 +6,7 @@ Parameters:
     Default: 'mark.binx.dev'
   HostedZoneId:
     Type: 'String'
-    Default: '/hostedzone/Z04677121D9WN6U2J4R4H'
+    Default: /hostedzone/Z0371259XDZLRTIQJZIY
 
 Resources:
   DomainIdentity:
