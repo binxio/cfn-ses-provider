@@ -22,7 +22,7 @@ class DomainIdentityProvider(SESProvider):
                 {
                     "Type": "TXT",
                     "Name": f"_amazonses.{self.domain}.",
-                    "ResourceRecords": [f'{token}'],
+                    "ResourceRecords": [f'"{token}"'],
                 }
             )
             self.set_attribute("Domain", self.domain)
