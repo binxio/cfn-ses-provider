@@ -88,7 +88,7 @@ Resources:
           - !Ref 'LambdaS3Bucket'
         S3Key: !If
           - UsePublicLambda
-          - lambdas/cfn-ses-provider-0.8.2.zip
+          - lambdas/cfn-ses-provider-0.8.3.zip
           - !Ref 'CFNSESProviderZipFileName'
       FunctionName: binxio-cfn-ses-provider
       Handler: ses.handler
