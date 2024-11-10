@@ -1,107 +1,66 @@
 include Makefile.mk
 
+USERNAME=xebia
 NAME=cfn-ses-provider
-S3_BUCKET_PREFIX=binxio-public
+
 AWS_REGION=eu-central-1
-ALL_REGIONS=$(shell printf "import boto3\nprint('\\\n'.join(map(lambda r: r['RegionName'], boto3.client('ec2').describe_regions()['Regions'])))\n" | python | grep -v '^$(AWS_REGION)$$')
+AWS_ACCOUNT=$(shell aws sts get-caller-identity --query Account --output text)
+REGISTRY_HOST=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com
+IMAGE=$(REGISTRY_HOST)/$(USERNAME)/$(NAME)
+TAG_WITH_LATEST=never
 
-.PHONY: help deploy deploy-all-regions release clean test deploy-provider delete-provider demo delete-demo check_prefix
 
-help:
-	@echo 'make                    - builds a zip file to target/.'
-	@echo 'make deploy             - deploy to the default region $(AWS_REGION).'
-	@echo 'make deploy-all-regions - deploy to all regions.'
-	@echo 'make release            - builds a zip file and deploys it to s3.'
-	@echo 'make clean              - the workspace.'
-	@echo 'make test               - execute the tests, requires a working AWS connection.'
-	@echo 'make deploy-provider    - deploys the provider.'
-	@echo 'make delete-provider    - deletes the provider.'
-	@echo 'make demo               - deploys the demo cloudformation stack.'
-	@echo 'make delete-demo        - deletes the demo cloudformation stack.'
+requirements.txt test-requirements.txt: Pipfile.lock
+	pipenv requirements > requirements.txt
+	pipenv requirements --dev-only > test-requirements.txt
 
-deploy: target/$(NAME)-$(VERSION).zip
-	aws s3 --region $(AWS_REGION) \
-		cp --acl public-read \
-		target/$(NAME)-$(VERSION).zip \
-		s3://$(S3_BUCKET_PREFIX)-$(AWS_REGION)/lambdas/$(NAME)-$(VERSION).zip 
-	aws s3 --region $(AWS_REGION) \
-		cp --acl public-read \
-		s3://$(S3_BUCKET_PREFIX)-$(AWS_REGION)/lambdas/$(NAME)-$(VERSION).zip \
-		s3://$(S3_BUCKET_PREFIX)-$(AWS_REGION)/lambdas/$(NAME)-latest.zip 
+Pipfile.lock: Pipfile
+	pipenv update
 
-deploy-all-regions: deploy
-	for REGION in $(ALL_REGIONS); do \
-		echo "copying to region $$REGION.." ; \
-		aws s3 --region $$REGION \
-			cp  --acl public-read \
-			--source-region $(AWS_REGION) \
-			s3://$(S3_BUCKET_PREFIX)-$(AWS_REGION)/lambdas/$(NAME)-$(VERSION).zip \
-			s3://$(S3_BUCKET_PREFIX)-$$REGION/lambdas/$(NAME)-$(VERSION).zip; \
-		aws s3 --region $$REGION \
-			cp  --acl public-read \
-			--source-region $(AWS_REGION) \
-			s3://$(S3_BUCKET_PREFIX)-$$REGION/lambdas/$(NAME)-$(VERSION).zip \
-			s3://$(S3_BUCKET_PREFIX)-$$REGION/lambdas/$(NAME)-latest.zip; \
-	done
-		
+test: Pipfile.lock
+	for n in ./cloudformation/*.yaml ; do aws cloudformation validate-template --template-body file://$$n ; done
+	PYTHONPATH=$(PWD)/src pipenv run pytest ./tests/test*.py
 
-do-push: deploy
+pre-build: requirements.txt
 
-do-build: target/$(NAME)-$(VERSION).zip
-
-target/$(NAME)-$(VERSION).zip: src/*.py requirements.txt
-	mkdir -p target
-	docker build --build-arg ZIPFILE=$(NAME)-$(VERSION).zip -t $(NAME)-lambda:$(VERSION) -f Dockerfile.lambda . && \
-		ID=$$(docker create $(NAME)-lambda:$(VERSION) /bin/true) && \
-		docker export $$ID | (cd target && tar -xvf - $(NAME)-$(VERSION).zip) && \
-		docker rm -f $$ID && \
-		chmod ugo+r target/$(NAME)-$(VERSION).zip
-
-venv: requirements.txt
-	virtualenv -p python3.8 venv  && \
-	. ./venv/bin/activate && \
-	pip --quiet install --upgrade pip && \
-	pip --quiet install -r requirements.txt 
-	
-clean:
-	rm -rf venv target src/*.pyc tests/*.pyc
-
-test: venv
-	. ./venv/bin/activate && \
-        python -m compileall src  && \
-	pip --quiet install -r test-requirements.txt && \
-	cd src && \
-	PYTHONPATH=$(PWD)/src pytest ../tests/test_*.py
 
 fmt:
 	black src/*.py tests/*.py
 
-deploy-provider: check_prefix
-	aws --region $(AWS_REGION) cloudformation deploy \
-		--capabilities CAPABILITY_IAM \
-		--stack-name $(NAME) \
-		--template-file ./cloudformation/cfn-resource-provider.yaml \
-		--parameter-overrides LambdaS3Bucket=$(S3_BUCKET_PREFIX)-$(AWS_REGION) \
-			CFNSESProviderZipFileName=lambdas/$(NAME)-$(VERSION).zip
-
-delete-provider:
-	aws --region $(AWS_REGION) cloudformation delete-stack --stack-name $(NAME)
-	aws --region $(AWS_REGION) cloudformation wait stack-delete-complete  --stack-name $(NAME)
-
-deploy-pipeline: 
+deploy-provider:  ## deploy the provider to the current account
+	sed -i '' -e 's^$(NAME):[0-9]*\.[0-9]*\.[0-9]*[^\.]*^$(NAME):$(VERSION)^' cloudformation/cfn-resource-provider.yaml
 	aws cloudformation deploy \
+                --stack-name $(NAME) \
                 --capabilities CAPABILITY_IAM \
+                --template-file ./cloudformation/cfn-resource-provider.yaml
+
+delete-provider:   ## delete provider from the current account
+	aws cloudformation delete-stack --stack-name $(NAME)
+	aws cloudformation wait stack-delete-complete  --stack-name $(NAME)
+
+
+
+deploy-pipeline:   ## deploy the CI/CD pipeline
+	aws cloudformation deploy \
                 --stack-name $(NAME)-pipeline \
+                --capabilities CAPABILITY_IAM \
                 --template-file ./cloudformation/cicd-pipeline.yaml \
-                --parameter-overrides \
-                        S3BucketPrefix=$(S3_BUCKET_PREFIX)
+		--parameter-overrides Name=$(NAME)
 
-demo:
-	aws --region $(AWS_REGION) cloudformation deploy  --stack-name $(NAME)-demo \
-		--capabilities CAPABILITY_IAM \
-		--template-file ./cloudformation/demo-stack.yaml 
+delete-pipeline:   ## delete the CI/CD pipeline
+	aws cloudformation delete-stack --stack-name $(NAME)-pipeline
+	aws cloudformation wait stack-delete-complete  --stack-name $(NAME)-pipeline
 
-delete-demo:
-	aws --region $(AWS_REGION) cloudformation delete-stack --stack-name $(NAME)-demo 
-	aws --region $(AWS_REGION) cloudformation wait stack-delete-complete  --stack-name $(NAME)-demo
+demo:		   ## deploy the demo
+	aws cloudformation deploy \
+		--stack-name $(NAME)-demo \
+		--capabilities CAPABILITY_NAMED_IAM \
+		--template-file ./cloudformation/demo-stack.yaml
 
+delete-demo:	   ## delete the demo
+	aws cloudformation delete-stack --stack-name $(NAME)-demo
+	aws cloudformation wait stack-delete-complete  --stack-name $(NAME)-demo
+
+ecr-login:	   ## login to the ECR repository
+	aws ecr get-login-password --region $(AWS_REGION) | \
+	docker login --username AWS --password-stdin $(REGISTRY_HOST)

@@ -1,24 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation SES Providers
-Parameters:
-  LambdaS3Bucket:
-    Type: String
-    Default: ''
-  CFNSESProviderZipFileName:
-    Type: String
-    Default: ''
-Conditions:
-  UsePublicBucket: !Equals
-    - !Ref 'LambdaS3Bucket'
-    - ''
-  UsePublicLambda: !Equals
-    - !Ref 'CFNSESProviderZipFileName'
-    - ''
 Resources:
   LambdaPolicy:
     Type: AWS::IAM::Policy
-    DependsOn:
-      - LambdaRole
     Properties:
       PolicyName: CFNSESProviderPolicy
       PolicyDocument:
@@ -61,6 +45,7 @@ Resources:
             Resource: arn:aws:logs:*:*:*
       Roles:
         - !Ref 'LambdaRole'
+
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -75,25 +60,17 @@ Resources:
             Principal:
               Service:
                 - lambda.amazonaws.com
+
   CFNSESProvider:
     Type: AWS::Lambda::Function
     DependsOn:
-      - LambdaRole
       - LambdaPolicy
     Properties:
       Description: CloudFormation SES provider implementation
+      PackageType: Image
       Code:
-        S3Bucket: !If
-          - UsePublicBucket
-          - !Sub 'binxio-public-${AWS::Region}'
-          - !Ref 'LambdaS3Bucket'
-        S3Key: !If
-          - UsePublicLambda
-          - lambdas/cfn-ses-provider-0.8.3.zip
-          - !Ref 'CFNSESProviderZipFileName'
+        ImageUri: 463637877380.dkr.ecr.eu-central-1.amazonaws.com/xebia/cfn-ses-provider:0.8.3-66306b3-dirty
       FunctionName: binxio-cfn-ses-provider
-      Handler: ses.handler
       MemorySize: 128
       Role: !GetAtt 'LambdaRole.Arn'
-      Runtime: python3.8
       Timeout: 30
