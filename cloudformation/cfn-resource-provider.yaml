@@ -69,7 +69,7 @@ Resources:
       Description: CloudFormation SES provider implementation
       PackageType: Image
       Code:
-        ImageUri: 463637877380.dkr.ecr.eu-central-1.amazonaws.com/xebia/cfn-ses-provider:0.8.3-66306b3-dirty
+        ImageUri: 463637877380.dkr.ecr.eu-central-1.amazonaws.com/xebia/cfn-ses-provider:1.0.0
       FunctionName: binxio-cfn-ses-provider
       MemorySize: 128
       Role: !GetAtt 'LambdaRole.Arn'
