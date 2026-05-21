@@ -44,7 +44,7 @@ Resources:
     Properties:
       Domain: !Ref 'ExternalDomainName'
       Region: !Ref 'EmailRegion'
-      MailFromSubdomain: 'mail'
+      MailFromSubdomain: !Sub 'mail.${ExternalDomainName}'
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-ses-provider'
 ```
 
